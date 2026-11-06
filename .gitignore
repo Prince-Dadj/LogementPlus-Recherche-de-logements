@@ -1,0 +1,22 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+backend/vendor/
+frontend/node_modules/
+
+# Build files
+frontend/dist/
+frontend/.angular/
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/

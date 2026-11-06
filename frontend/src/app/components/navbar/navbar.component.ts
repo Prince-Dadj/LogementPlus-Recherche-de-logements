@@ -1,0 +1,165 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+
+@Component({
+  selector: 'app-navbar',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top py-2 app-navbar">
+      <div class="container-fluid px-lg-4">
+        <!-- Logo CDC 8.4 : Maison stylisée dont le toit forme un repère pin -->
+        <a class="navbar-brand d-flex align-items-center gap-2 py-0" routerLink="/">
+          <span class="d-inline-flex align-items-center justify-content-center bg-white text-primary rounded-circle shadow-sm" style="width: 34px; height: 34px; color: #0B3D91 !important;">
+            <i class="bi bi-geo-alt-fill fs-6" style="transform: translateY(-1px);"></i>
+          </span>
+          <span class="fw-bold tracking-tight text-white fs-5" style="font-family: 'Poppins', sans-serif;">
+            Logement<span style="color: #14B8A6;">Plus</span>
+          </span>
+          
+        </a>
+
+        <!-- Bouton mobile toggle -->
+        <button class="navbar-toggler border-0 shadow-none px-2 py-1" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavbar">
+          <!-- Liens de navigation épurés -->
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+            <li class="nav-item me-2">
+              <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/" routerLinkActive="active opacity-100 fw-bold" [routerLinkActiveOptions]="{exact: true}">
+                <i class="bi bi-house me-1"></i> Accueil
+              </a>
+            </li>
+            <li class="nav-item me-2">
+              <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom " routerLink="/logements" routerLinkActive="active opacity-100 fw-bold">
+                <i class="bi bi-search me-1"></i> Explorer & Carte
+              </a>
+            </li>
+            <li class="nav-item me-2">
+              <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom " routerLink="/contact" routerLinkActive="active opacity-100 fw-bold">
+                <i class="bi bi-headset me-1"></i> Contact
+              </a>
+            </li>
+            <!-- <li class="nav-item me-2">
+              <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom " routerLink="/faq" routerLinkActive="active opacity-100 fw-bold">
+                <i class="bi bi-question-circle me-1"></i> FAQ
+              </a>
+            </li> -->
+
+            <!-- Mes Réservations : UNIQUEMENT quand l'utilisateur est connecté en tant que locataire -->
+            @if (currentUser() && currentUser()?.role === 'locataire') {
+              <li class="nav-item">
+                <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/locataire" routerLinkActive="active opacity-100 fw-bold">
+                  <i class="bi bi-calendar-check me-1"></i> Mes Réservations
+                </a>
+              </li>
+            }
+
+            <!-- Espace Gestionnaire : UNIQUEMENT pour les admins connectés -->
+            @if (currentUser() && (currentUser()?.role === 'admin' || currentUser()?.role === 'superadmin')) {
+              <li class="nav-item">
+                <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/admin" routerLinkActive="active opacity-100 fw-bold">
+                  <i class="bi bi-buildings me-1"></i> Espace Gestionnaire
+                </a>
+              </li>
+            }
+
+            <!-- Super Admin : UNIQUEMENT pour super admin connecté -->
+            @if (currentUser() && currentUser()?.role === 'superadmin') {
+              <li class="nav-item">
+                <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/superadmin" routerLinkActive="active opacity-100 fw-bold">
+                  <i class="bi bi-shield-lock me-1"></i> Super Admin
+                </a>
+              </li>
+            }
+          </ul>
+
+          <!-- Zone Compte : Connexion et Inscription (Espace admin et portail admin supprimés de la barre publique) -->
+          <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+            @if (currentUser()) {
+              <!-- Utilisateur Connecté : Menu profil -->
+              <div class="dropdown">
+                <button class="btn btn-outline-light btn-sm dropdown-toggle rounded-2 px-3 py-1 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-person-circle fs-6"></i>
+                  <span class="fw-semibold">{{ currentUser()?.name }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 10px;">
+                  <li class="px-3 py-2 border-bottom">
+                    <p class="mb-0 fw-bold small text-dark">{{ currentUser()?.name }}</p>
+                    <p class="mb-0 text-muted small" style="font-size: 12px;">{{ currentUser()?.email }}</p>
+                    <span class="badge rounded-2 mt-1" [ngClass]="{
+                      'bg-primary': currentUser()?.role === 'locataire',
+                      'bg-warning text-dark': currentUser()?.role === 'admin',
+                      'bg-danger': currentUser()?.role === 'superadmin'
+                    }" style="font-size: 12px;">
+                      {{ currentUser()?.role | uppercase}}
+                    </span>
+                  </li>
+                  <!-- @if (currentUser()?.role === 'locataire') {
+                    <li><a class="dropdown-item py-2 small" routerLink="/locataire"><i class="bi bi-calendar2-check me-2 text-primary"></i> Mes Réservations</a></li>
+                  }
+                  @if (currentUser()?.role === 'admin') {
+                    <li><a class="dropdown-item py-2 small" routerLink="/admin"><i class="bi bi-speedometer2 me-2 text-warning"></i> Dashboard Gestionnaire</a></li>
+                  }
+                  @if (currentUser()?.role === 'superadmin') {
+                    <li><a class="dropdown-item py-2 small" routerLink="/superadmin"><i class="bi bi-shield-check me-2 text-danger"></i> Administration Plateforme</a></li>
+                  } 
+                  <li><hr class="dropdown-divider my-1"></li>-->
+                  <li>
+                    <button class="dropdown-item text-danger py-2 small" (click)="logout()">
+                      <i class="bi bi-box-arrow-right me-2"></i> Déconnexion
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            } @else {
+              <!-- Visiteur Non Connecté : Boutons Connexion et Inscription clairs -->
+              <a routerLink="/login" [queryParams]="{mode: 'login'}" class="btn btn-outline-light btn-sm rounded-2 px-3 py-1 d-flex align-items-center gap-1">
+                <i class="bi bi-box-arrow-in-right"></i>
+                <span class="fw-semibold">Connexion</span>
+              </a>
+              <a routerLink="/login" [queryParams]="{mode: 'register'}" class="btn btn-accent btn-sm rounded-2 px-3 py-1 d-flex align-items-center gap-1 shadow-sm">
+                <i class="bi bi-person-plus-fill"></i>
+                <span class="fw-semibold">Inscription</span>
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+    </nav>
+  `,
+  styles: [`
+    .app-navbar {
+      background-color: rgba(11, 61, 145, 0.94) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      box-shadow: 0 4px 20px rgba(7, 37, 89, 0.2) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      z-index: 1030 !important;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .nav-link-custom {
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      &:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #FFFFFF !important;
+      }
+    }
+  `]
+})
+export class NavbarComponent {
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  currentUser = this.auth.currentUser;
+
+  logout() {
+    this.auth.logout();
+    this.router.navigate(['/']);
+  }
+}
