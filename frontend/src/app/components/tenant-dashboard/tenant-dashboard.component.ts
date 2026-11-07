@@ -1582,6 +1582,7 @@ export class TenantDashboardComponent implements OnInit, OnDestroy {
         this.isUploadingAvatar = false;
         this.avatarSuccessMessage = res.message || 'Photo de profil mise à jour avec succès.';
         this.selectedAvatarFile = null;
+        this.avatarPreviewUrl = null;
         setTimeout(() => {
           this.avatarSuccessMessage = '';
           this.cdr.markForCheck();

@@ -8,7 +8,7 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top py-2 app-navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-2 app-navbar">
       <div class="container-fluid px-lg-4">
         <!-- Logo CDC 8.4 : Maison stylisée dont le toit forme un repère pin -->
         <a class="navbar-brand d-flex align-items-center gap-2 py-0" routerLink="/">
@@ -54,7 +54,7 @@ import { AuthService } from '../../services/auth.service';
             @if (currentUser() && currentUser()?.role === 'locataire') {
               <li class="nav-item">
                 <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/locataire" routerLinkActive="active opacity-100 fw-bold">
-                  <i class="bi bi-calendar-check me-1"></i> Mon espace locataire
+                  <i class="bi bi-calendar-check me-1"></i> Mon Espace Locataire
                 </a>
               </li>
             }
@@ -63,7 +63,7 @@ import { AuthService } from '../../services/auth.service';
             @if (currentUser() && (currentUser()?.role === 'admin' || currentUser()?.role === 'superadmin')) {
               <li class="nav-item">
                 <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/admin" routerLinkActive="active opacity-100 fw-bold">
-                  <i class="bi bi-buildings me-1"></i> Mon espace gestionnaire
+                  <i class="bi bi-buildings me-1"></i> Mon Espace Gestionnaire
                 </a>
               </li>
             }
@@ -84,10 +84,9 @@ import { AuthService } from '../../services/auth.service';
               <!-- Utilisateur Connecté : Menu profil -->
               <div class="dropdown">
                 <button class="btn btn-outline-light btn-sm dropdown-toggle rounded-2 px-3 py-1 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
-                  @if(currentUser()?.avatar_url){
-                  <img [src]="currentUser()?.avatar_url" alt="" style="width: 30px; height: 30px;" class="rounded-pill">
-                  }
-                  @else {
+                  @if (avatarUrl) {
+                    <img [src]="avatarUrl" (error)="onAvatarError()" alt="" style="width: 28px; height: 28px; object-fit: cover;" class="rounded-circle shadow-sm">
+                  } @else {
                     <i class="bi bi-person-circle"></i>
                   }
                   <span class="fw-semibold">{{ currentUser()?.name }}</span>
@@ -162,6 +161,30 @@ export class NavbarComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   currentUser = this.auth.currentUser;
+
+  private lastCheckedUrl: string | null = null;
+  private imageFailed = false;
+
+  get avatarUrl(): string | null {
+    const raw = this.currentUser()?.avatar_url;
+    if (!raw) return null;
+
+    let clean = raw.trim();
+    if (!clean.startsWith('http') && !clean.startsWith('data:')) {
+      clean = `http://localhost:8000${clean.startsWith('/') ? '' : '/'}${clean}`;
+    }
+
+    if (clean !== this.lastCheckedUrl) {
+      this.lastCheckedUrl = clean;
+      this.imageFailed = false;
+    }
+
+    return this.imageFailed ? null : clean;
+  }
+
+  onAvatarError(): void {
+    this.imageFailed = true;
+  }
 
   logout() {
     this.auth.logout();

@@ -43,6 +43,20 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Accesseur pour garantir une URL d'avatar absolue et valide
+     */
+    public function getAvatarUrlAttribute($value)
+    {
+        if (!$value) {
+            return null;
+        }
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://') || str_starts_with($value, 'data:')) {
+            return $value;
+        }
+        return url($value);
+    }
+
     // Un Admin gère 0 à n logements (CDC 10.2)
     public function logements()
     {

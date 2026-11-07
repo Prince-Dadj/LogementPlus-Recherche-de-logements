@@ -72,11 +72,25 @@ export class AuthService {
     const savedUser = localStorage.getItem('auth_user');
     if (savedUser) {
       try {
-        this.currentUser.set(JSON.parse(savedUser));
+        const parsed = JSON.parse(savedUser);
+        this.currentUser.set(this.formatUser(parsed));
       } catch (e) {
         localStorage.removeItem('auth_user');
       }
     }
+  }
+
+  /** Normalise l'utilisateur pour garantir que l'URL d'avatar est absolue vers le backend */
+  public formatUser(user: any): User | null {
+    if (!user) return null;
+    const cloned: User = { ...user };
+    if (cloned.avatar_url && typeof cloned.avatar_url === 'string') {
+      if (!cloned.avatar_url.startsWith('http') && !cloned.avatar_url.startsWith('data:')) {
+        const cleanPath = cloned.avatar_url.startsWith('/') ? cloned.avatar_url : `/${cloned.avatar_url}`;
+        cloned.avatar_url = `http://localhost:8000${cleanPath}`;
+      }
+    }
+    return cloned;
   }
 
   public getAuthHeaders(): HttpHeaders {
@@ -161,10 +175,11 @@ export class AuthService {
   }
 
   public setSession(user: User, token: string): void {
-    this.currentUser.set(user);
+    const formatted = this.formatUser(user)!;
+    this.currentUser.set(formatted);
     this.token.set(token);
     localStorage.setItem('auth_token', token);
-    localStorage.setItem('auth_user', JSON.stringify(user));
+    localStorage.setItem('auth_user', JSON.stringify(formatted));
   }
 
   public clearSession(): void {
@@ -198,10 +213,11 @@ export class AuthService {
     return this.http.put<any>(`${this.apiUrl}/profile`, data, { headers }).pipe(
       tap((res) => {
         const updatedUser = res.user || res;
-        const finalUser: User = {
+        const merged: User = {
           ...current,
           ...updatedUser
         };
+        const finalUser = this.formatUser(merged)!;
         this.currentUser.set(finalUser);
         localStorage.setItem('auth_user', JSON.stringify(finalUser));
       }),
@@ -212,9 +228,10 @@ export class AuthService {
             ...data,
             name: data.name || `${data.prenom || current.prenom || ''} ${data.nom || current.nom || ''}`.trim() || current.name
           };
-          this.currentUser.set(updated);
-          localStorage.setItem('auth_user', JSON.stringify(updated));
-          return of({ user: updated, message: 'Informations mises à jour (mode local)' });
+          const finalUser = this.formatUser(updated)!;
+          this.currentUser.set(finalUser);
+          localStorage.setItem('auth_user', JSON.stringify(finalUser));
+          return of({ user: finalUser, message: 'Informations mises à jour (mode local)' });
         }
         return throwError(() => err);
       })
@@ -253,9 +270,10 @@ export class AuthService {
       tap(res => {
         const current = this.currentUser();
         if (current && res.avatar_url) {
-          const fullAvatarUrl = res.avatar_url.startsWith('http') 
-            ? res.avatar_url 
-            : `http://localhost:8000${res.avatar_url}`;
+          const raw = res.avatar_url;
+          const fullAvatarUrl = (raw.startsWith('http') || raw.startsWith('data:')) 
+            ? raw 
+            : `http://localhost:8000${raw.startsWith('/') ? '' : '/'}${raw}`;
           const updated: User = { ...current, avatar_url: fullAvatarUrl };
           this.currentUser.set(updated);
           localStorage.setItem('auth_user', JSON.stringify(updated));

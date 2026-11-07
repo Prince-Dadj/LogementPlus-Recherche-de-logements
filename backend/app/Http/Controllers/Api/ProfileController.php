@@ -130,7 +130,7 @@ class ProfileController extends Controller
         return response()->json([
             'message' => 'Photo de profil mise à jour avec succès.',
             'user' => $user,
-            'avatar_url' => $avatarUrl,
+            'avatar_url' => $user->avatar_url,
         ]);
     }
 }

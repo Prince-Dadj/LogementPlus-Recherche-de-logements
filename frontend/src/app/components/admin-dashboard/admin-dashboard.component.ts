@@ -30,8 +30,8 @@ Chart.register(...registerables);
             <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
               <i class="bi bi-buildings-fill text-primary fs-4"></i>
               <div>
-                <strong class="d-block small text-dark">Espace Gestion</strong>
-                <span class="badge bg-warning text-dark small">ADMIN</span>
+                <strong class="d-block text-dark">Espace Gestionnaire</strong>
+                <span class="badge bg-warning text-dark small">Administrateur</span>
               </div>
             </div>
 
@@ -2249,7 +2249,11 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
       this.profileNom = user.nom || (user.name ? user.name.split(' ').slice(1).join(' ') : '');
       this.profileEmail = user.email || '';
       this.profileTelephone = user.telephone || '';
-      this.avatarPreview = user.avatar_url || null;
+      let av = user.avatar_url || null;
+      if (av && !av.startsWith('http') && !av.startsWith('data:')) {
+        av = `http://localhost:8000${av.startsWith('/') ? '' : '/'}${av}`;
+      }
+      this.avatarPreview = av;
     }
     this.cdr.markForCheck();
     this.cdr.detectChanges();
@@ -2344,7 +2348,11 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
 
   annulerAvatarPreview(): void {
     this.selectedAvatarFile = null;
-    this.avatarPreview = this.currentUser()?.avatar_url || null;
+    let av = this.currentUser()?.avatar_url || null;
+    if (av && !av.startsWith('http') && !av.startsWith('data:')) {
+      av = `http://localhost:8000${av.startsWith('/') ? '' : '/'}${av}`;
+    }
+    this.avatarPreview = av;
     this.cdr.markForCheck();
     this.cdr.detectChanges();
   }
@@ -2360,7 +2368,11 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
       next: (res) => {
         this.isUploadingAvatar = false;
         this.avatarSuccessMessage = res.message || 'Photo de profil mise à jour avec succès.';
-        this.avatarPreview = res.avatar_url || this.avatarPreview;
+        let newAv = res.avatar_url || this.avatarPreview;
+        if (newAv && !newAv.startsWith('http') && !newAv.startsWith('data:')) {
+          newAv = `http://localhost:8000${newAv.startsWith('/') ? '' : '/'}${newAv}`;
+        }
+        this.avatarPreview = newAv;
         this.selectedAvatarFile = null;
         this.cdr.markForCheck();
         this.cdr.detectChanges();
