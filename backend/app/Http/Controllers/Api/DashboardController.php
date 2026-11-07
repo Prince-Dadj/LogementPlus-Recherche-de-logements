@@ -19,6 +19,7 @@ class DashboardController extends Controller
     public function statsAdmin(Request $request)
     {
         $adminId = $request->user()->id;
+        $annee = (int) $request->get('annee', date('Y'));
 
         $logementIds = Logement::where('admin_id', $adminId)->pluck('id');
         $nbLogements = $logementIds->count();
@@ -42,22 +43,60 @@ class DashboardController extends Controller
             ->groupBy('type')
             ->get();
 
-        // Évolution des réservations par mois (pour graphiques Chart.js - RF-70)
-        $evolutionMensuelle = [
-            ['mois' => 'Mai', 'reservations' => 4, 'revenus' => 760000],
-            ['mois' => 'Juin', 'reservations' => 6, 'revenus' => 1140000],
-            ['mois' => 'Juil', 'reservations' => 8, 'revenus' => 1520000],
-            ['mois' => 'Août', 'reservations' => 7, 'revenus' => 1330000],
-            ['mois' => 'Sept', 'reservations' => 9, 'revenus' => 1710000],
-            ['mois' => 'Oct', 'reservations' => max(1, $totalReservations), 'revenus' => max(380000, $revenusPercus)],
+        // Évolution des réservations et revenus encaissés pour TOUS les 12 mois de l'année sélectionnée (dynamique et fiable)
+        $moisNoms = [
+            1 => 'Jan', 2 => 'Fév', 3 => 'Mar', 4 => 'Avr', 5 => 'Mai', 6 => 'Juin',
+            7 => 'Juil', 8 => 'Août', 9 => 'Sept', 10 => 'Oct', 11 => 'Nov', 12 => 'Déc'
         ];
 
+        $evolutionMensuelle = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $yearMonth = sprintf('%04d-%02d', $annee, $m);
+
+            // Somme dynamique des encaissements / reversements réussis pour ce mois
+            $paiementsMois = Paiement::whereHas('reservation', function ($q) use ($logementIds) {
+                $q->whereIn('logement_id', $logementIds);
+            })
+            ->where('statut', 'reussi')
+            ->where('created_at', 'like', "{$yearMonth}%")
+            ->sum('montant_reverse_admin');
+
+            // Réservations payées sans ligne de paiement distincte
+            $resPayeesSansPaiement = Reservation::whereIn('logement_id', $logementIds)
+                ->where('statut', 'payee')
+                ->where('created_at', 'like', "{$yearMonth}%")
+                ->whereDoesntHave('paiements', function ($q) {
+                    $q->where('statut', 'reussi');
+                })
+                ->sum('montant_total');
+
+            // Nombre de réservations validées / payées pour ce mois
+            $resMois = Reservation::whereIn('logement_id', $logementIds)
+                ->where('created_at', 'like', "{$yearMonth}%")
+                ->whereIn('statut', ['confirmee', 'payee'])
+                ->count();
+
+            $revenusMois = (float) ($paiementsMois + ($resPayeesSansPaiement * 0.9));
+
+            $evolutionMensuelle[] = [
+                'mois' => $moisNoms[$m],
+                'mois_num' => $m,
+                'annee' => $annee,
+                'reservations' => $resMois,
+                'revenus' => round($revenusMois),
+            ];
+        }
+
+        $revenusAnnee = (float) array_sum(array_column($evolutionMensuelle, 'revenus'));
+
         return response()->json([
+            'annee' => $annee,
+            'annees_disponibles' => [2026, 2025, 2024],
             'nb_logements' => $nbLogements,
             'total_reservations' => $totalReservations,
             'reservations_en_attente' => $reservationsEnAttente,
             'reservations_confirmees' => $reservationsConfirmees,
-            'revenus_percus' => $revenusPercus,
+            'revenus_percus' => $revenusPercus ?: $revenusAnnee,
             'taux_occupation' => $tauxOccupation,
             'repartition_types' => $repartitionTypes,
             'evolution_mensuelle' => $evolutionMensuelle,

@@ -160,7 +160,7 @@ export class DossierLocataireService {
    * Inspecte le fichier réel (capture d'écran, nom, aspect ratio, pixels et métadonnées)
    */
   public async analyserEtVerifierAutomatique(
-    categorie: 'identite' | 'revenus',
+    categorie: 'identite',
     file: File | null,
     payload: {
       type: string;
@@ -174,6 +174,10 @@ export class DossierLocataireService {
   ): Promise<ResultatAudit> {
     const dossier = { ...this.dossierSubject.value };
     const piece = dossier[categorie];
+
+    if (!piece) {
+      return { succes: false, score: 0, message: 'Pièce introuvable dans le dossier.' };
+    }
 
     // Marquer d'abord en cours d'analyse
     piece.statut = 'en_analyse';
@@ -274,7 +278,7 @@ export class DossierLocataireService {
    */
   private validerPieceConforme(
     dossier: DossierLocataire,
-    categorie: 'identite' | 'revenus',
+    categorie: 'identite',
     piece: PieceDossier,
     score: number = 98
   ): ResultatAudit {

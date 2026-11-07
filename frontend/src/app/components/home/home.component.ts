@@ -119,11 +119,13 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
         </div>
 
         <!-- Indicateurs du diaporama d'arrière-plan (légende du bien mis en avant + pastilles) -->
-        <div class="row align-items-center justify-content-center text-center">
+        <div class="p-1 row align-items-center justify-content-center text-center">
           <div class="col-auto d-flex align-items-center gap-2 px-3 py-1 rounded-2 shadow-sm" style="background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(5px);">
             <i class="bi bi-camera-fill text-warning small"></i>
-            <span class="small text-white fw-medium" style="font-size: 12px;">{{ heroSlides[activeSlide]?.title || 'Résidence de prestige au Sénégal' }}</span>
-            <span class="badge bg-warning text-dark small" style="font-size: 11px;">{{ heroSlides[activeSlide]?.price || 'Disponible' }}</span>
+            <span class="d-lg-flex d-none small text-white fw-medium" style="font-size: 12px;">{{ heroSlides[activeSlide]?.title || 'Résidence de prestige au Sénégal' }}</span>
+            <span class="d-lg-flex d-none badge bg-warning text-dark small" style="font-size: 11px;">{{ heroSlides[activeSlide]?.price || 'Disponible' }}</span>
+            <span class="d-flex d-lg-none small text-white fw-medium" style="font-size: 10px;">{{ heroSlides[activeSlide]?.title || 'Résidence de prestige au Sénégal' }}</span>
+            <span class="d-flex d-lg-none badge bg-warning text-dark small" style="font-size: 9px;">{{ heroSlides[activeSlide]?.price || 'Disponible' }}</span>
 
             <!-- Pastilles de navigation du slider -->
             <div class="d-flex align-items-center gap-1 ms-2">
@@ -207,7 +209,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
         </div>
 
         <div class="row g-3">
-          @for (zone of neighborhoods; track zone.name) {
+          @for (zone of neighborhoods.slice(0, 6); track zone.name) {
             <div class="col-6 col-md-4 col-lg-2">
               <div class="neighborhood-card" (click)="filterByNeighborhood(zone.name)">
                 <img [src]="zone.image" [alt]="zone.name" loading="lazy">
@@ -462,19 +464,19 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
 
               <!-- Décomposition en direct -->
               <div class="row g-2 mb-3 text-center">
-                <div class="col-4">
+                <div class="col-md-4 col-12">
                   <div class="p-2 rounded-3 bg-light border">
                     <small class="text-muted d-block" style="font-size: 11px;">1er Mois de loyer</small>
                     <strong class="text-dark small tabular-numbers">{{ simLoyer | number }} FCFA</strong>
                   </div>
                 </div>
-                <div class="col-4">
+                <div class="col-md-4 col-12">
                   <div class="p-2 rounded-3 bg-light border">
                     <small class="text-muted d-block" style="font-size: 11px;">Caution légale (max 2 mois)</small>
                     <strong class="text-dark small tabular-numbers">{{ simCaution | number }} FCFA</strong>
                   </div>
                 </div>
-                <div class="col-4">
+                <div class="col-md-4 col-12">
                   <div class="p-2 rounded-3 bg-light border">
                     <small class="text-muted d-block" style="font-size: 11px;">Frais plateforme (5%)</small>
                     <strong class="text-dark small tabular-numbers">{{ simFrais | number }} FCFA</strong>
@@ -492,16 +494,16 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
                   <i class="bi bi-funnel me-1"></i> Filtrer les biens ({{ simMatchingCount }})
                 </button>
               </div>
-<!--               
-              <div class="p-3 rounded-3   mb-3" style="background: rgba(11, 61, 145, 0.06); border: 1.5px dashed #0B3D91; display: block !important;">
+                             
+              <div class="p-3 rounded-3 d-block d-lg-none mb-3" style="background: rgba(11, 61, 145, 0.06); border: 1.5px dashed #0B3D91;">
                 <div>
                   <small class="text-secondary d-block fw-semibold" style="font-size: 11px;">Total estimé à l'entrée :</small>
                   <span class="fs-5 fw-bold text-primary tabular-numbers">{{ simTotal | number }} FCFA</span>
                 </div>
-                <button type="button" class="btn btn-primary btn-sm rounded-2 px-3 py-2 fw-semibold" (click)="applySimBudget()">
+                <button type="button" class="btn btn-primary btn-sm rounded-2 px-3 py-2 fw-semibold mt-2 w-100" (click)="applySimBudget()">
                   <i class="bi bi-funnel me-1"></i> Filtrer les biens ({{ simMatchingCount }})
                 </button>
-              </div> -->
+              </div> 
             </div>
           </div>
         </div>
@@ -564,7 +566,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
   
 
     <!-- SECTION LOGEMENTPLUS EN CHIFFRES — STATISTIQUES INDÉPENDANTES ANIMÉES -->
-    <section class="py-5 mt-5" id="statsPlateformeSection" style="background: linear-gradient(135deg, #0B3D91 0%, #0d2557 100%); border-top: 4px solid #14B8A6;">
+    <section class="py-5 mt-5" id="statsPlateformeSection" style="background: linear-gradient(135deg, #0B3D91 0%, #0d2557 100%); border-top: 4px solid #14B8A6; border-bottom: 4px solid #14B8A6;">
       <div class="container">
         <div class="text-start mb-4">
           <h2 class="h3 fw-bold text-white mb-1"> <span style="font-size: 30px;" class="text-secondary me-2">LogementPlus</span> en chiffres</h2>
@@ -617,7 +619,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
           </div>
 
           <!-- Carte 4 : Locations réalisées -->
-          <div class="col-6 col-md-3">
+          <div class="col-6 col-md-3 mb-3">
             <div class="ugb-stat-card">
               <div class="ugb-stat-left">
                 <div class="ugb-stat-icon mb-3" style="color: #34D399;">
@@ -635,13 +637,13 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
     </section>
 
     <!-- SECTION AGENCES PARTENAIRES — DYNAMIQUE + MARQUEE + EMPTY STATE -->
-    <section class="py-5 overflow-hidden" style="background: linear-gradient(135deg, #0B3D91 0%, #0d2557 100%);  border-bottom: 4px solid #14B8A6;">
+    <!-- <section class="py-5 overflow-hidden" style="background: linear-gradient(135deg, #0B3D91 0%, #0d2557 100%);  border-bottom: 4px solid #14B8A6;">
       <div class="container mb-4">
         <div class="row align-items-center">
           <div class="col-lg-8">
-            <!-- <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25 px-3 py-1 small fw-semibold mb-2">
+             <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25 px-3 py-1 small fw-semibold mb-2">
               <i class="bi bi-building-check me-1"></i> Réseau Certifié Sénégal
-            </span> -->
+            </span> 
             <h2 class="h3 fw-bold text-white mb-1">Les agences immobilières qui nous font confiance</h2>
             <p class="text-white-50 small mb-0">Des professionnels agréés collaborent avec LogementPlus pour vous proposer des biens audités et conformes aux baux sénégalais.</p>
           </div>
@@ -675,7 +677,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
           </div>
         </div>
       } @else if (agences && agences.length > 0) {
-        <!-- Bande défilante infinie automatique dynamique -->
+       
         <div class="agencies-marquee-outer">
           <div class="agencies-marquee">
             @for (a of agences; track a.id) {
@@ -693,7 +695,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
                 </div>
               </div>
             }
-            <!-- Duplication pour boucle infinie fluide automatique -->
+            
             @for (a of agences; track a.id + '_dup') {
               <div class="agency-logo-card p-3">
                 <div class="agency-icon-wrap">
@@ -712,7 +714,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
           </div>
         </div>
       } @else {
-        <!-- EMPTY STATE MODERNE & STYLISÉ POUR LES AGENCES PARTENAIRES -->
+        
         <div class="container my-2">
           <div class="p-4 p-md-5 rounded-4 text-center"
                style="background: rgba(255, 255, 255, 0.05); border: 2px dashed rgba(255, 255, 255, 0.2); backdrop-filter: blur(8px);">
@@ -731,7 +733,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
           </div>
         </div>
       }
-    </section>
+    </section> -->
 
     <!-- 7. TÉMOIGNAGES CLIENTS & PARTENAIRES — DYNAMIQUE + SLIDER + EMPTY STATE -->
     <section class="py-5 position-relative mt-5" style="background-color: #F8FAFC;">
@@ -1194,11 +1196,11 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Images statiques de haute qualité pour le diaporama Hero — indépendantes des logements
   heroSlides = [
-    { url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=85', title: "Villas d'architecte & Demeures contemporaines • Almadies", price: "Cadre d'exception" },
-    { url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=85', title: 'Résidences de standing & Piscines privées • Saly Portudal', price: 'Séjour balnéaire' },
-    { url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=85', title: 'Appartements haut standing vue mer • Corniche Ouest & Fann', price: 'Confort premium' },
-    { url: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1920&q=85', title: "Intérieurs modernes & Espaces lumineux • Plateau & Mermoz", price: 'Emplacements phares' },
-    { url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1920&q=85', title: "Propriétés exclusives avec jardin & Sécurité 24h • Dakar", price: 'Baux sécurisés' }
+    { url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=85', title: "Villas d'architecte & Demeures contemporaines", price: "Cadre d'exception" },
+    { url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=85', title: 'Résidences de standing & Piscines privées', price: 'Séjour balnéaire' },
+    { url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=85', title: 'Appartements haut standing vue mer', price: 'Confort premium' },
+    { url: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1920&q=85', title: "Intérieurs modernes & Espaces lumineux", price: 'Emplacements phares' },
+    { url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1920&q=85', title: "Propriétés exclusives avec jardin & Sécurité 24h", price: 'Baux sécurisés' }
   ];
 
   activeSlide = 0;
@@ -1332,6 +1334,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         if (data && data.length > 0) {
           this.neighborhoods = data;
           this.cdr.markForCheck();
+          this.cdr.detectChanges();
         }
       }
     });
@@ -1418,6 +1421,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   updateNeighborhoods(): void {
     this.neighborhoods = this.logementService.computeNeighborhoodsSync(this.allLogements);
     this.cdr.markForCheck();
+    this.cdr.detectChanges();
   }
 
   startTestimonialSlider(): void {

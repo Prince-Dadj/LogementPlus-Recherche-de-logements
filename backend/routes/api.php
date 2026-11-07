@@ -78,6 +78,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- Admin (Gestionnaire) : Logements et Réservations (RF-40..45) ---
     Route::get('/admin/logements', [LogementController::class, 'mesLogements']);
     Route::post('/admin/logements', [LogementController::class, 'store']);
+    Route::put('/admin/logements/{id}', [LogementController::class, 'update']);
+    Route::delete('/admin/logements/{id}', [LogementController::class, 'destroy']);
     Route::patch('/admin/logements/{id}/toggle-statut', [LogementController::class, 'toggleStatut']);
     Route::get('/admin/reservations', [ReservationController::class, 'reservationsGestionnaire']);
     Route::post('/admin/reservations/{id}/valider', [ReservationController::class, 'valider']);

@@ -9,6 +9,7 @@ import { AuthService } from '../../services/auth.service';
 import { FavoriService } from '../../services/favori.service';
 import { ModalAlertService } from '../../services/modal-alert.service';
 import { Logement, ReservationCalculation } from '../../models/models';
+import { geocodeSenegal } from '../../utils/geocoding';
 
 declare let L: any;
 
@@ -178,28 +179,71 @@ declare let L: any;
               </div>
             </div>
 
-            <!-- Points d'intérêt & Proximité à Dakar / Sénégal -->
+            <!-- Points d'intérêt & Proximité -Données dynamiques saisies par le gestionnaire -->
             <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
               <h2 class="h6 fw-bold mb-3 text-dark">
                 <i class="bi bi-geo-alt text-danger me-2"></i>Points d'intérêt & Accessibilité
               </h2>
-              <div class="row g-2 text-muted small" style="font-size: 12px;">
-                <div class="col-md-6 d-flex align-items-center gap-2">
-                  <i class="bi bi-water text-primary fs-6"></i>
-                  <span><strong>Plages & Corniche :</strong> à moins de 5-10 minutes</span>
+              @if (logement.points_interet || logement.accessibilite) {
+                <div class="row g-3">
+                  @if (logement.points_interet) {
+                    <div class="col-md-6">
+                      <h3 class="small fw-bold text-dark mb-2"><i class="bi bi-pin-map text-primary me-1"></i>Points d'intérêt à proximité</h3>
+                      <div class="text-muted small" style="font-size: 12px; white-space: pre-line; line-height: 1.7;">{{ logement.points_interet }}</div>
+                    </div>
+                  }
+                  @if (logement.accessibilite) {
+                    <div class="col-md-6">
+                      <h3 class="small fw-bold text-dark mb-2"><i class="bi bi-sign-turn-right text-success me-1"></i>Accessibilité & Transport</h3>
+                      <div class="text-muted small" style="font-size: 12px; white-space: pre-line; line-height: 1.7;">{{ logement.accessibilite }}</div>
+                    </div>
+                  }
                 </div>
-                <div class="col-md-6 d-flex align-items-center gap-2">
-                  <i class="bi bi-airplane text-secondary fs-6"></i>
-                  <span><strong>Aéroport AIBD :</strong> Accessible via Autoroute à péage (40 min)</span>
+              } @else {
+                <div class="row g-2 text-muted small" style="font-size: 12px;">
+                  <div class="col-md-6 d-flex align-items-center gap-2">
+                    <i class="bi bi-geo text-primary fs-6"></i>
+                    <span><strong>Localisation :</strong> {{ logement.quartier || logement.ville }}, Sénégal</span>
+                  </div>
+                  <div class="col-md-6 d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-check text-warning fs-6"></i>
+                    <span><strong>Zone résidentielle :</strong> Quartier calme et sécurisé</span>
+                  </div>
                 </div>
-                <div class="col-md-6 d-flex align-items-center gap-2">
-                  <i class="bi bi-cart3 text-success fs-6"></i>
-                  <span><strong>Commerces & Supermarchés :</strong> Auchan, Casino et marchés à proximité</span>
+              }
+            </div>
+
+            <!-- CARTE INTERACTIVE DE LOCALISATION PRÉCISE DU BIEN -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white overflow-hidden">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                <div>
+                  <h2 class="h6 fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+                    <i class="bi bi-geo-alt-fill text-danger fs-5"></i>
+                    <span>Situation Géographique & Carte</span>
+                  </h2>
+                  <p class="text-muted small mb-0">
+                    <i class="bi bi-pin-map me-1 text-primary"></i>
+                    <strong>{{ logement.adresse }}</strong> -{{ logement.quartier ? logement.quartier + ', ' : '' }}{{ logement.ville }} (Sénégal)
+                  </p>
                 </div>
-                <div class="col-md-6 d-flex align-items-center gap-2">
-                  <i class="bi bi-shield-check text-warning fs-6"></i>
-                  <span><strong>Sécurité du quartier :</strong> Zone résidentielle calme et sécurisée 24/7</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-light text-dark border px-3 py-2 small" style="font-size: 11px;">
+                    <i class="bi bi-crosshair me-1 text-primary"></i> GPS : {{ logement.latitude | number:'1.4-4' }}, {{ logement.longitude | number:'1.4-4' }}
+                  </span>
+                  <a [href]="getGoogleMapsUrl()" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm rounded-2 px-3 shadow-sm">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Ouvrir dans Google Maps
+                  </a>
                 </div>
+              </div>
+
+              <!-- Conteneur Carte Leaflet -->
+              <div class="position-relative rounded-3 overflow-hidden border" style="height: 320px;">
+                <div #detailMapContainer id="detailMapContainer" style="width: 100%; height: 100%; z-index: 1;"></div>
+              </div>
+
+              <div class="mt-2 d-flex align-items-center justify-content-between flex-wrap gap-2 text-muted small" style="font-size: 11px;">
+                <span><i class="bi bi-info-circle me-1 text-primary"></i>Emplacement vérifié et géoréférencé avec précision sur la carte.</span>
+                <span class="text-success fw-medium"><i class="bi bi-shield-check me-1"></i>Adresse certifiée LogementPlus Sénégal</span>
               </div>
             </div>
 
@@ -614,6 +658,8 @@ export class LogementDetailComponent implements OnInit, OnDestroy, AfterViewInit
   calcul: ReservationCalculation | null = null;
   private isBrowser: boolean;
   private sub?: Subscription;
+  private detailMap: any = null;
+  private detailMarker: any = null;
 
   // Modale LogementPlus "Poser une question"
   showQuestionModal = false;
@@ -647,11 +693,16 @@ export class LogementDetailComponent implements OnInit, OnDestroy, AfterViewInit
     this.sub = this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id')) || 1;
 
+      
+
       // 1. Initialisation synchrone immédiate (0 ms de latence)
       this.logement = this.logementService.getLogementSync(id);
       this.activePhoto = this.logement.image_principale || '';
       this.onDateChange();
       this.cdr.markForCheck();
+      setTimeout(() => this.initDetailMap(), 300);
+
+      
 
       // 2. Rafraîchissement asynchrone si API
       this.logementService.getLogement(id).subscribe({
@@ -662,6 +713,7 @@ export class LogementDetailComponent implements OnInit, OnDestroy, AfterViewInit
             this.activePhoto = data.image_principale || this.activePhoto;
             this.onDateChange();
             this.cdr.markForCheck();
+            setTimeout(() => this.initDetailMap(), 250);
           }
         },
         error: (err) => console.log('Utilisation du catalogue Sénégal local pour le logement', id)
@@ -673,10 +725,88 @@ export class LogementDetailComponent implements OnInit, OnDestroy, AfterViewInit
     if (this.sub) {
       this.sub.unsubscribe();
     }
+    if (this.detailMap) {
+      this.detailMap.remove();
+      this.detailMap = null;
+      this.detailMarker = null;
+    }
   }
 
   ngAfterViewInit(): void {
     this.cdr.detectChanges();
+    if (this.isBrowser && this.logement) {
+      setTimeout(() => this.initDetailMap(), 350);
+    }
+  }
+
+  getGoogleMapsUrl(): string {
+    if (!this.logement) return '#';
+    const lat = this.logement.latitude || 16.0326;
+    const lng = this.logement.longitude || -16.4818;
+    return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  }
+
+  private initDetailMap(): void {
+    if (!this.isBrowser || typeof L === 'undefined' || !this.logement) return;
+    const container = document.getElementById('detailMapContainer');
+    if (!container) return;
+
+    if (this.detailMap) {
+      this.detailMap.remove();
+      this.detailMap = null;
+      this.detailMarker = null;
+    }
+
+    let lat = this.logement.latitude;
+    let lng = this.logement.longitude;
+
+    if (!lat || !lng || lat < 11 || lat > 18) {
+      const geo = geocodeSenegal(this.logement.ville, this.logement.quartier);
+      lat = geo.lat;
+      lng = geo.lng;
+      this.logement.latitude = lat;
+      this.logement.longitude = lng;
+    }
+
+    this.detailMap = L.map(container, {
+      zoomControl: true,
+      scrollWheelZoom: false
+    }).setView([lat, lng], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(this.detailMap);
+
+    const customIcon = L.divIcon({
+      className: 'custom-map-pin',
+      html: `
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="background:#0B3D91;color:#FFF;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,0.3);border:2px solid #FFF;white-space:nowrap;">
+            <i class="bi bi-geo-alt-fill text-warning me-1"></i>${(this.logement.prix_par_mois / 1000).toFixed(0)}k CFA
+          </div>
+          <div class="map-location-pulse" style="margin-top:-4px;"></div>
+        </div>
+      `,
+      iconSize: [80, 50],
+      iconAnchor: [40, 48]
+    });
+
+    this.detailMarker = L.marker([lat, lng], { icon: customIcon }).addTo(this.detailMap);
+
+    const popupHtml = `
+      <div style="padding:10px 12px;font-family:'Inter',sans-serif;max-width:220px;">
+        <strong style="font-size:13px;color:#0B3D91;display:block;margin-bottom:2px;">${this.logement.titre}</strong>
+        <div style="font-size:11px;color:#64748B;margin-bottom:4px;">
+          <i class="bi bi-geo-alt me-1 text-danger"></i>${this.logement.quartier ? this.logement.quartier + ', ' : ''}${this.logement.ville}
+        </div>
+        <div style="font-weight:700;color:#14B8A6;font-size:13px;">
+          ${Number(this.logement.prix_par_mois).toLocaleString('fr-FR')} FCFA / mois
+        </div>
+      </div>
+    `;
+
+    this.detailMarker.bindPopup(popupHtml).openPopup();
   }
 
   setActivePhoto(url: string): void {
@@ -776,6 +906,7 @@ export class LogementDetailComponent implements OnInit, OnDestroy, AfterViewInit
   soumettreAvis(): void {
     if (!this.logement) return;
     const user = this.auth.currentUser();
+  
     if (!user) {
       this.avisErrorMessage = 'Veuillez vous connecter pour laisser votre avis.';
       this.cdr.markForCheck();

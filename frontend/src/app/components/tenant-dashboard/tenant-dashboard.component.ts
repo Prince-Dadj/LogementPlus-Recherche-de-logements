@@ -40,7 +40,7 @@ import { Subscription } from 'rxjs';
               </span>
             }
           </div>
-          <p class="text-muted small mb-0 mt-2">
+          <p class="text-muted small mb-0 mt-lg-2 mt-3">
             Bienvenue, <span class="fw-bold text-dark fs-5">{{ currentUser()?.name }}</span> . Gérez vos réservations, vos favoris, votre profil et vos pièces justificatives certifiées.
           </p>
         </div>
@@ -1322,6 +1322,8 @@ export class TenantDashboardComponent implements OnInit, OnDestroy {
     this.loadReservations();
     this.loadFavoris();
     this.loadDossier();
+
+    console.log(this.auth.currentUser())
 
     // Abonnement aux conversations de messagerie
     this.convSub = this.messageService.conversations$.subscribe(convs => {

@@ -7,6 +7,7 @@ import { FavoriService } from '../../services/favori.service';
 import { AuthService } from '../../services/auth.service';
 import { ModalAlertService } from '../../services/modal-alert.service';
 import { Equipement, Logement } from '../../models/models';
+import { geocodeSenegal } from '../../utils/geocoding';
 
 declare let L: any;
 
@@ -422,28 +423,45 @@ export class LogementListComponent implements OnInit, AfterViewInit, OnDestroy {
     const bounds: any[] = [];
 
     this.logements.forEach(logement => {
-      if (logement.latitude && logement.longitude) {
+      let lat = logement.latitude;
+      let lng = logement.longitude;
+
+      if (!lat || !lng || lat < 11 || lat > 18) {
+        const geo = geocodeSenegal(logement.ville, logement.quartier);
+        lat = geo.lat;
+        lng = geo.lng;
+        logement.latitude = lat;
+        logement.longitude = lng;
+      }
+
+      if (lat && lng) {
         const customIcon = L.divIcon({
           className: 'custom-map-pin',
           html: `
-            <div style="background-color: #0B3D91; color: #FFFFFF; font-weight: 700; font-size: 11px; padding: 4px 8px; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); border: 2px solid #FFFFFF; white-space: nowrap; cursor: pointer;">
-              ${(logement.prix_par_mois / 1000).toFixed(0)}k CFA
+            <div class="map-price-bubble" style="background:#0B3D91;color:#FFF;font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;border:2px solid #FFF;box-shadow:0 3px 10px rgba(0,0,0,0.3);white-space:nowrap;cursor:pointer;">
+              <i class="bi bi-geo-alt-fill text-warning me-1"></i>${(logement.prix_par_mois / 1000).toFixed(0)}k CFA
             </div>
           `,
-          iconSize: [60, 24],
-          iconAnchor: [30, 12]
+          iconSize: [80, 26],
+          iconAnchor: [40, 13]
         });
 
-        const marker = L.marker([logement.latitude, logement.longitude], { icon: customIcon }).addTo(this.map);
+        const marker = L.marker([lat, lng], { icon: customIcon }).addTo(this.map);
 
         const popupContent = `
-          <div style="max-width: 220px; font-family: 'Inter', sans-serif;">
+          <div style="max-width: 230px; font-family: 'Inter', sans-serif; padding: 6px;">
             <img src="${logement.image_principale}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;">
-            <strong style="font-size: 13px; display: block; margin-bottom: 4px;">${logement.titre}</strong>
-            <span style="color: #0B3D91; font-weight: 700; font-size: 14px;">${Number(logement.prix_par_mois).toLocaleString()} FCFA</span>
-            <div style="margin-top: 6px;">
-              <a href="/logements/${logement.id}" style="display: block; text-align: center; background: #0B3D91; color: #FFF; padding: 4px 8px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: 600;">
-                Voir la fiche
+            <strong style="font-size: 13px; display: block; margin-bottom: 2px; color: #1F2937;">${logement.titre}</strong>
+            <small style="color: #64748B; font-size: 11px; display: block; margin-bottom: 4px;">
+              <i class="bi bi-geo-alt text-danger me-1"></i>${logement.quartier ? logement.quartier + ', ' : ''}${logement.ville}
+            </small>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span style="color: #0B3D91; font-weight: 700; font-size: 13px;">${Number(logement.prix_par_mois).toLocaleString('fr-FR')} FCFA</span>
+              <span style="font-size: 10px; background: #EEF2FF; color: #0B3D91; padding: 2px 6px; border-radius: 4px; font-weight: 600;">${(logement.type || '').toUpperCase()}</span>
+            </div>
+            <div>
+              <a href="/logements/${logement.id}" style="display: block; text-align: center; background: #0B3D91; color: #FFF; padding: 5px 8px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: 600;">
+                Voir la fiche & Réserver
               </a>
             </div>
           </div>
@@ -451,12 +469,14 @@ export class LogementListComponent implements OnInit, AfterViewInit, OnDestroy {
 
         marker.bindPopup(popupContent);
         this.markersMap.set(logement.id, marker);
-        bounds.push([logement.latitude, logement.longitude]);
+        bounds.push([lat, lng]);
       }
     });
 
-    if (bounds.length > 0) {
-      this.map.fitBounds(bounds, { padding: [40, 40] });
+    if (bounds.length === 1) {
+      this.map.setView(bounds[0], 15);
+    } else if (bounds.length > 1) {
+      this.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
     }
   }
 

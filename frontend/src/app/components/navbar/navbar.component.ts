@@ -54,7 +54,7 @@ import { AuthService } from '../../services/auth.service';
             @if (currentUser() && currentUser()?.role === 'locataire') {
               <li class="nav-item">
                 <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/locataire" routerLinkActive="active opacity-100 fw-bold">
-                  <i class="bi bi-calendar-check me-1"></i> Mes Réservations
+                  <i class="bi bi-calendar-check me-1"></i> Mon espace locataire
                 </a>
               </li>
             }
@@ -63,7 +63,7 @@ import { AuthService } from '../../services/auth.service';
             @if (currentUser() && (currentUser()?.role === 'admin' || currentUser()?.role === 'superadmin')) {
               <li class="nav-item">
                 <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/admin" routerLinkActive="active opacity-100 fw-bold">
-                  <i class="bi bi-buildings me-1"></i> Espace Gestionnaire
+                  <i class="bi bi-buildings me-1"></i> Mon espace gestionnaire
                 </a>
               </li>
             }
@@ -84,7 +84,12 @@ import { AuthService } from '../../services/auth.service';
               <!-- Utilisateur Connecté : Menu profil -->
               <div class="dropdown">
                 <button class="btn btn-outline-light btn-sm dropdown-toggle rounded-2 px-3 py-1 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
-                  <i class="bi bi-person-circle fs-6"></i>
+                  @if(currentUser()?.avatar_url){
+                  <img [src]="currentUser()?.avatar_url" alt="" style="width: 30px; height: 30px;" class="rounded-pill">
+                  }
+                  @else {
+                    <i class="bi bi-person-circle"></i>
+                  }
                   <span class="fw-semibold">{{ currentUser()?.name }}</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 10px;">
@@ -96,7 +101,7 @@ import { AuthService } from '../../services/auth.service';
                       'bg-warning text-dark': currentUser()?.role === 'admin',
                       'bg-danger': currentUser()?.role === 'superadmin'
                     }" style="font-size: 12px;">
-                      {{ currentUser()?.role | uppercase}}
+                      {{ currentUser()?.role}}
                     </span>
                   </li>
                   <!-- @if (currentUser()?.role === 'locataire') {

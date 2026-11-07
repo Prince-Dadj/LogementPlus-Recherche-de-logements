@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, catchError, tap, map } from 'rxjs';
 import { Avis, Equipement, Logement, Neighborhood } from '../models/models';
 import { AuthService } from './auth.service';
+import { geocodeSenegal } from '../utils/geocoding';
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +32,19 @@ export class LogementService {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          this.catalogueLogements = parsed;
+          this.catalogueLogements = parsed.map((item: any) => {
+            if (item.titre?.includes('1AG1') || item.quartier?.toLowerCase().includes('saint-louis') || item.quartier === 'Sanar' || item.quartier === 'Ngallèle') {
+              item.ville = 'Saint-Louis';
+            }
+            // Corriger les coordonnées imprécises ou hors Sénégal (ex: Abidjan lat ~ 5.3)
+            if (!item.latitude || !item.longitude || item.latitude < 11 || item.latitude > 18) {
+              const geo = geocodeSenegal(item.ville, item.quartier);
+              item.latitude = geo.lat;
+              item.longitude = geo.lng;
+            }
+            return item;
+          });
+          this.saveCatalogToStorage();
           return;
         }
       }
@@ -39,7 +52,7 @@ export class LogementService {
       // Erreur de parsing : on utilise le seed
     }
     // Premier lancement ou données corrompues : seed initial
-    this.catalogueLogements = this.getSeedCatalogue();
+    //this.catalogueLogements = this.getSeedCatalogue();
     this.saveCatalogToStorage();
   }
 
@@ -346,6 +359,19 @@ export class LogementService {
     });
 
     return this.http.get<Logement[]>(`${this.apiUrl}/logements`, { params }).pipe(
+      tap((list: Logement[]) => {
+        if (list && list.length > 0) {
+          list.forEach(item => {
+            const idx = this.catalogueLogements.findIndex(c => c.id === item.id);
+            if (idx !== -1) {
+              this.catalogueLogements[idx] = { ...this.catalogueLogements[idx], ...item };
+            } else {
+              this.catalogueLogements.push(item);
+            }
+          });
+          this.saveCatalogToStorage();
+        }
+      }),
       map((list: Logement[]) => list.map(l => {
         const isOcc = this.estLogementOccupe(l.id);
         const log: Logement = { ...l, est_occupe: isOcc, statut_occupation: isOcc ? 'occupe' : 'disponible' };
@@ -377,6 +403,17 @@ export class LogementService {
   // RF-14 : Détail logement avec garantie de chargement immédiat
   getLogement(id: number): Observable<Logement> {
     return this.http.get<Logement>(`${this.apiUrl}/logements/${id}`).pipe(
+      tap((l: Logement) => {
+        if (l) {
+          const idx = this.catalogueLogements.findIndex(c => c.id === l.id);
+          if (idx !== -1) {
+            this.catalogueLogements[idx] = { ...this.catalogueLogements[idx], ...l };
+          } else {
+            this.catalogueLogements.unshift(l);
+          }
+          this.saveCatalogToStorage();
+        }
+      }),
       map((l: Logement) => {
         const isOcc = this.estLogementOccupe(l.id);
         const log: Logement = { ...l, est_occupe: isOcc, statut_occupation: isOcc ? 'occupe' : 'disponible' };
@@ -481,6 +518,29 @@ export class LogementService {
     const headers = this.auth.getAuthHeaders();
     const user = this.auth.currentUser();
 
+    // Résolution précise des coordonnées géographiques au Sénégal
+    if (!data.latitude || !data.longitude || data.latitude < 11 || data.latitude > 18) {
+      const geo = geocodeSenegal(data.ville, data.quartier);
+      data.latitude = geo.lat;
+      data.longitude = geo.lng;
+    }
+
+    // Préparer les photos : convertir les data URLs (upload local) en objets Photo
+    const photos = (data.photos || []).filter((p: string) => p && p.trim()).map((url: string, i: number) => ({
+      id: Date.now() + i,
+      logement_id: 0,
+      url: url,
+      ordre: i + 1
+    }));
+
+    const equipementsNoms: string[] = data.equipements_liste || [];
+    const equipementsObj = equipementsNoms.map((nom: string, i: number) => ({
+      id: Date.now() + i + 100,
+      nom,
+      categorie: 'confort',
+      icone: 'bi-check-circle'
+    }));
+
     const newLogement: Logement = {
       id: Date.now(),
       ...data,
@@ -491,6 +551,9 @@ export class LogementService {
         email: (user as any)?.email || '',
         raison_sociale: data.raison_sociale || 'Agence Immobilière'
       },
+      photos: photos,
+      equipements: equipementsObj,
+      image_principale: photos[0]?.url || data.image_principale || '',
       statut_occupation: 'disponible',
       est_occupe: false,
       note_moyenne: 0,
@@ -504,6 +567,62 @@ export class LogementService {
 
     return this.http.post<Logement>(`${this.apiUrl}/admin/logements`, data, { headers }).pipe(
       catchError(() => of(newLogement))
+    );
+  }
+
+  updateLogement(id: number, data: any): Observable<Logement> {
+    const headers = this.auth.getAuthHeaders();
+
+    // Résolution précise des coordonnées géographiques au Sénégal
+    if (!data.latitude || !data.longitude || data.latitude < 11 || data.latitude > 18) {
+      const geo = geocodeSenegal(data.ville, data.quartier);
+      data.latitude = geo.lat;
+      data.longitude = geo.lng;
+    }
+
+    const photos = (data.photos || []).filter((p: string) => p && p.trim()).map((url: string, i: number) => ({
+      id: Date.now() + i,
+      logement_id: id,
+      url: url,
+      ordre: i + 1
+    }));
+
+    const equipementsNoms: string[] = data.equipements_liste || [];
+    const equipementsObj = equipementsNoms.map((nom: string, i: number) => ({
+      id: Date.now() + i + 100,
+      nom,
+      categorie: 'confort',
+      icone: 'bi-check-circle'
+    }));
+
+    // Mise à jour locale immédiate
+    const idx = this.catalogueLogements.findIndex(l => l.id === id);
+    if (idx !== -1) {
+      this.catalogueLogements[idx] = {
+        ...this.catalogueLogements[idx],
+        ...data,
+        photos: photos.length > 0 ? photos : this.catalogueLogements[idx].photos,
+        equipements: equipementsObj.length > 0 ? equipementsObj : this.catalogueLogements[idx].equipements,
+        image_principale: photos[0]?.url || this.catalogueLogements[idx].image_principale
+      };
+      this.saveCatalogToStorage();
+    }
+
+    const updated = this.catalogueLogements[idx];
+    return this.http.put<Logement>(`${this.apiUrl}/admin/logements/${id}`, data, { headers }).pipe(
+      catchError(() => of(updated))
+    );
+  }
+
+  deleteLogement(id: number): Observable<any> {
+    const headers = this.auth.getAuthHeaders();
+
+    // Suppression locale immédiate
+    this.catalogueLogements = this.catalogueLogements.filter(l => l.id !== id);
+    this.saveCatalogToStorage();
+
+    return this.http.delete(`${this.apiUrl}/admin/logements/${id}`, { headers }).pipe(
+      catchError(() => of({ success: true, id }))
     );
   }
 
@@ -572,80 +691,50 @@ export class LogementService {
     );
   }
 
-  // Méthode de calcul synchrone en direct basée sur les logements réels du catalogue
+  // Méthode de calcul synchrone en direct basée sur les logements réels du catalogue et de la base de données
   computeNeighborhoodsSync(logements?: Logement[]): Neighborhood[] {
-    const list = logements || this.catalogueLogements;
+    const list = (logements && logements.length > 0) ? logements : this.catalogueLogements;
+    if (!list || list.length === 0) return [];
 
-    const baseZones: { name: string; tag: string; label: string; image: string; pattern: string }[] = [
-      {
-        name: 'Almadies',
-        tag: 'Prestige',
-        label: 'Pointe des Almadies & Ambassades',
-        image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=600&q=80',
-        pattern: 'almadies'
-      },
-      {
-        name: 'Fann Résidence',
-        tag: 'Résidentiel',
-        label: 'Corniche Ouest & Vue Mer',
-        image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80',
-        pattern: 'fann'
-      },
-      {
-        name: 'Plateau',
-        tag: 'Affaires',
-        label: 'Centre d\'Affaires & Ministères',
-        image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80',
-        pattern: 'plateau'
-      },
-      {
-        name: 'Ngor',
-        tag: 'Bord de mer',
-        label: 'Ngor Virage & Phare des Mamelles',
-        image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80',
-        pattern: 'ngor'
-      },
-      {
-        name: 'Point E',
-        tag: 'Central',
-        label: 'Point E & UCAD',
-        image: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80',
-        pattern: 'point e'
-      },
-      {
-        name: 'Saly Portudal',
-        tag: 'Détente',
-        label: 'Villas Balnéaires & Petite Côte',
-        image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80',
-        pattern: 'saly'
+    // Regroupement dynamique par quartier & ville depuis les logements réels de la BDD
+    const map = new Map<string, Neighborhood>();
+
+    for (const log of list) {
+      const q = (log.quartier || '').trim();
+      const v = (log.ville || '').trim() || 'Sénégal';
+      if (!q) continue;
+
+      const key = `${q.toLowerCase()}_${v.toLowerCase()}`;
+      if (!map.has(key)) {
+        let tag = v;
+        const qLower = q.toLowerCase();
+        if (qLower.includes('almadies')) tag = 'Prestige';
+        else if (qLower.includes('fann')) tag = 'Résidentiel';
+        else if (qLower.includes('plateau')) tag = 'Affaires';
+        else if (qLower.includes('ngor')) tag = 'Bord de mer';
+        else if (qLower.includes('saly')) tag = 'Détente';
+        else if (qLower.includes('sanar') || qLower.includes('ugb')) tag = 'Saint-Louis';
+        else if (qLower.includes('ngallele') || qLower.includes('ngallèle')) tag = 'Saint-Louis';
+        else if (qLower.includes('sor')) tag = 'Saint-Louis';
+        else if (qLower.includes('point e')) tag = 'Central';
+
+        map.set(key, {
+          name: q,
+          count: 0,
+          ville: v,
+          tag: tag,
+          label: `${q} • ${v}`,
+          image: log.image_principale || 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&w=600&q=80'
+        });
       }
-    ];
 
-    return baseZones.map(zone => {
-      const p = zone.pattern.toLowerCase();
-      // Comptage dynamique temps réel sur la liste effective des logements publiés
-      const count = list.filter(l => {
-        const q = (l.quartier || '').toLowerCase();
-        const v = (l.ville || '').toLowerCase();
-        const t = (l.titre || '').toLowerCase();
-        return q.includes(p) || v.includes(p) || t.includes(p);
-      }).length;
+      const entry = map.get(key)!;
+      entry.count++;
+      if ((!entry.image || entry.image.includes('unsplash')) && log.image_principale) {
+        entry.image = log.image_principale;
+      }
+    }
 
-      // Utilise la photo d'un logement existant si disponible
-      const matchingLogement = list.find(l => {
-        const q = (l.quartier || '').toLowerCase();
-        const v = (l.ville || '').toLowerCase();
-        const t = (l.titre || '').toLowerCase();
-        return q.includes(p) || v.includes(p) || t.includes(p);
-      });
-
-      return {
-        name: zone.name,
-        count: count,
-        tag: zone.tag,
-        label: zone.label,
-        image: matchingLogement?.image_principale || zone.image
-      };
-    });
+    return Array.from(map.values()).sort((a, b) => b.count - a.count);
   }
 }

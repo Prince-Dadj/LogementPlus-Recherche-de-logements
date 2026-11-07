@@ -20,7 +20,7 @@ import { AuthService } from '../../services/auth.service';
             <div class="p-0 printable-recu">
               <!-- En-tête officiel Reçu -->
               <div class="p-4 text-white position-relative" style="background: linear-gradient(135deg, #072559 0%, #0B3D91 60%, #14B8A6 100%);">
-                <div class="d-flex justify-content-between align-items-start">
+                <div class="d-lg-flex d-none justify-content-between align-items-start">
                   <div>
                     <span class="badge bg-white text-dark fw-bold px-2 py-1 mb-2">
                       <i class="bi bi-shield-check text-success me-1"></i> RÉPUBLIQUE DU SÉNÉGAL
@@ -29,6 +29,21 @@ import { AuthService } from '../../services/auth.service';
                     <p class="small text-white-50 mb-0">Plateforme Immobilière Certifiée • LogementPlus Sénégal</p>
                   </div>
                   <div class="text-end">
+                    <span class="badge bg-success bg-opacity-25 border border-success text-white px-3 py-2 fs-6">
+                      <i class="bi bi-check-circle-fill text-warning me-1"></i> CONFIRMÉ ✓
+                    </span>
+                    <div class="small text-white-50 mt-1">Réf: #REC-SN-2026-{{ state.reservation?.id || 'SN' }}</div>
+                  </div>
+                </div>
+                <div class="d-block d-lg-none align-items-start">
+                  <div class="mb-3">
+                    <span class="badge bg-white text-dark fw-bold px-2 py-1 mb-2">
+                      <i class="bi bi-shield-check text-success me-1"></i> RÉPUBLIQUE DU SÉNÉGAL
+                    </span>
+                    <h5 class="fw-bold mb-1 text-white">REÇU OFFICIEL DE SÉQUESTRE & PAIEMENT</h5>
+                    <p class="small text-white-50 mb-0">Plateforme Immobilière Certifiée • LogementPlus Sénégal</p>
+                  </div>
+                  <div class="text-start">
                     <span class="badge bg-success bg-opacity-25 border border-success text-white px-3 py-2 fs-6">
                       <i class="bi bi-check-circle-fill text-warning me-1"></i> CONFIRMÉ ✓
                     </span>
@@ -113,7 +128,7 @@ import { AuthService } from '../../services/auth.service';
                     Fermer
                   </button>
                   <button type="button" class="btn btn-primary rounded-2 px-4 fw-bold shadow-sm" (click)="imprimer()">
-                    <i class="bi bi-printer me-1"></i> Imprimer le Reçu Officiel
+                    <i class="bi bi-printer me-1"></i> Imprimer le Reçu 
                   </button>
                 </div>
               </div>
@@ -125,7 +140,7 @@ import { AuthService } from '../../services/auth.service';
             <div class="p-0 printable-contrat">
               <!-- En-tête officiel Contrat -->
               <div class="p-4 text-white" style="background: linear-gradient(135deg, #072559 0%, #1e3a8a 100%);">
-                <div class="d-flex justify-content-between align-items-start">
+                <div class="d-lg-flex d-none justify-content-between align-items-start">
                   <div>
                     <span class="badge bg-warning text-dark fw-bold px-2 py-1 mb-2">
                       <i class="bi bi-file-earmark-text-fill me-1"></i> CONTRAT DE BAIL D'HABITATION
@@ -134,6 +149,19 @@ import { AuthService } from '../../services/auth.service';
                     <p class="small text-white-50 mb-0">Conforme à la Loi n° 81-52 portant Code des Obligations Civiles et Commerciales (COCC)</p>
                   </div>
                   <div class="text-end">
+                    <span class="badge bg-success px-3 py-2">SIGNÉ ÉLECTRONIQUEMENT ✓</span>
+                    <div class="small text-white-50 mt-1">Réf: {{ state.reservation?.contrat?.numero || 'LP-2026-SN-' + (state.reservation?.id || '25') }}</div>
+                  </div>
+                </div>
+                <div class="d-block d-lg-none align-items-start">
+                  <div class="mb-2">
+                    <span class="badge bg-warning text-dark fw-bold px-2 py-1 mb-2">
+                      <i class="bi bi-file-earmark-text-fill me-1"></i> CONTRAT DE BAIL D'HABITATION
+                    </span>
+                    <h5 class="fw-bold mb-1 text-white">RÉPUBLIQUE DU SÉNÉGAL</h5>
+                    <p class="small text-white-50 mb-0">Conforme à la Loi n° 81-52 portant Code des Obligations Civiles et Commerciales (COCC)</p>
+                  </div>
+                  <div class="text-start">
                     <span class="badge bg-success px-3 py-2">SIGNÉ ÉLECTRONIQUEMENT ✓</span>
                     <div class="small text-white-50 mt-1">Réf: {{ state.reservation?.contrat?.numero || 'LP-2026-SN-' + (state.reservation?.id || '25') }}</div>
                   </div>
@@ -174,8 +202,15 @@ import { AuthService } from '../../services/auth.service';
                   <p class="small mb-0">Du <strong>{{ state.reservation?.date_debut | date: 'dd/MM/yyyy' }}</strong> au <strong>{{ state.reservation?.date_fin | date: 'dd/MM/yyyy'}}</strong> (Renouvelable selon accord des parties).</p>
                 </div>
 
-                <div class="p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center mt-3">
+                <div class="p-3 bg-light rounded-3 border d-lg-flex d-none justify-content-between align-items-center mt-3">
                   <div>
+                    <div class="small fw-bold text-success"><i class="bi bi-shield-lock-fill me-1"></i> Signature Électronique Horodatée</div>
+                    <div class="small text-muted" style="font-size: 11px;">Authentification certifiée par plateforme LogementPlus Sénégal</div>
+                  </div>
+                  <span class="badge bg-success">VALIDE & ENREGISTRÉ</span>
+                </div>
+                <div class="p-3 bg-light rounded-3 border d-block d-lg-none align-items-center mt-3">
+                  <div class="mb-3">
                     <div class="small fw-bold text-success"><i class="bi bi-shield-lock-fill me-1"></i> Signature Électronique Horodatée</div>
                     <div class="small text-muted" style="font-size: 11px;">Authentification certifiée par plateforme LogementPlus Sénégal</div>
                   </div>

@@ -15,10 +15,11 @@ export class DashboardService {
     private auth: AuthService
   ) {}
 
-  // RF-70 & RF-73 : Statistiques Gestionnaire
-  getAdminStats(): Observable<AdminStats> {
+  // RF-70 & RF-73 : Statistiques Gestionnaire avec filtrage par année (dynamique)
+  getAdminStats(annee?: number): Observable<AdminStats> {
     const headers = this.auth.getAuthHeaders();
-    return this.http.get<AdminStats>(`${this.apiUrl}/admin/dashboard-stats`, { headers });
+    const query = annee ? `?annee=${annee}` : '';
+    return this.http.get<AdminStats>(`${this.apiUrl}/admin/dashboard-stats${query}`, { headers });
   }
 
   // Section 5 & RF-70 : Statistiques Super Admin

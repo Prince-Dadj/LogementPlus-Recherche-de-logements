@@ -29,6 +29,8 @@ class Logement extends Model
         'mode_reservation',
         'politique_annulation',
         'reglement_interieur',
+        'points_interet',
+        'accessibilite',
         'image_principale',
     ];
 

@@ -74,6 +74,8 @@ export interface Logement {
   mode_reservation: 'immediate' | 'sur_validation';
   politique_annulation: 'gratuite' | 'partielle' | 'non_remboursable';
   reglement_interieur?: string;
+  points_interet?: string;
+  accessibilite?: string;
   image_principale?: string;
   photos?: Photo[];
   equipements?: Equipement[];
@@ -170,6 +172,8 @@ export interface RecuPaiement {
 }
 
 export interface AdminStats {
+  annee?: number;
+  annees_disponibles?: number[];
   nb_logements: number;
   total_reservations: number;
   reservations_en_attente: number;
