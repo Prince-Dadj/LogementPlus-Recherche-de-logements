@@ -88,6 +88,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/paiements/{id}/rembourser', [PaiementController::class, 'rembourser']);
     Route::get('/admin/agences', [AgenceController::class, 'adminIndex']);
     Route::post('/admin/agences', [AgenceController::class, 'store']);
+    Route::put('/admin/agences/{id}', [AgenceController::class, 'update']);
+    Route::post('/admin/agences/{id}', [AgenceController::class, 'update']);
+    Route::delete('/admin/agences/{id}', [AgenceController::class, 'destroy']);
+    Route::patch('/admin/agences/{id}/toggle-certification', [AgenceController::class, 'toggleCertification']);
 
     // --- Super Admin : Supervision, Paramétrage & Audit (RF-50..54) ---
     Route::get('/superadmin/dashboard-stats', [DashboardController::class, 'statsSuperAdmin']);

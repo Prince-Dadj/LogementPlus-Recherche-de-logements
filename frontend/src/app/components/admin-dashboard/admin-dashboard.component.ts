@@ -214,15 +214,15 @@ Chart.register(...registerables);
                         <td class="fw-bold tabular-numbers text-primary small">{{ r.montant_total | number }} FCFA</td>
                         <td>
                           @if (r.statut === 'en_attente') {
-                            <span class="badge-status-pending small rounded-2">En attente</span>
+                            <span class="badge-status-pending rounded-2">En attente</span>
                           } @else if (r.statut === 'confirmee') {
                             <span class="badge-status-confirmed small rounded-2">Confirmée</span>
                           } @else if (r.statut === 'payee') {
-                            <span class="badge-status-paid small rounded-2">Payée</span>
+                            <span class="badge-status-paid rounded-2">Payée</span>
                           } @else if (r.statut === 'refusee') {
-                            <span class="badge-status-cancelled small rounded-2">Refusée</span>
+                            <span class="badge-status-cancelled rounded-2">Refusée</span>
                           } @else {
-                            <span class="badge bg-secondary small rounded-2">{{ r.statut }}</span>
+                            <span class="badge bg-danger rounded-2">{{ r.statut }}</span>
                           }
                         </td>
                         <td class="text-end">
@@ -231,7 +231,7 @@ Chart.register(...registerables);
                               <i class="bi bi-chat-dots-fill text-primary"></i>
                             </button> -->
                             @if (r.statut === 'en_attente') {
-                              <div class="btn-group btn-group-sm" style="p;">
+                              <div class="btn-group btn-group-sm">
                                 <!-- Voir dossier locataire -->
                                 <button class="btn btn-outline-primary" (click)="ouvrirDossier(r)"><i class="bi bi-folder2-open me-1"></i>Dossier</button>
                                 <!-- Valider (CDC RF-43) -->
@@ -758,9 +758,9 @@ Chart.register(...registerables);
                       <thead class="table-light text-muted small">
                         <tr>
                           <th>Agence & Logo</th>
-                          <th>Localisation</th>
+                          <!-- <th>Localisation</th> -->
                           <th>Contact</th>
-                          <th>Biens</th>
+                          <!-- <th>Biens</th> -->
                           <th>Statut</th>
                           <th class="text-end">Actions</th>
                         </tr>
@@ -769,7 +769,22 @@ Chart.register(...registerables);
                         @for (ag of agencesAdmin; track ag.id) {
                           <tr>
                             <td>
-                              <div class="d-flex align-items-center gap-3">
+                              <div class="d-lg-flex d-none align-items-center gap-3">
+                                @if (ag.logo_url) {
+                                  <img [src]="ag.logo_url" [alt]="ag.nom" class="rounded-3 object-fit-cover shadow-sm border" style="width: 44px; height: 44px;">
+                                } @else {
+                                  <div class="rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 44px; height: 44px; background: rgba(20, 184, 166, 0.12); color: #0d9488;">
+                                    <i class="bi {{ ag.icone || 'bi-buildings' }} fs-4"></i>
+                                  </div>
+                                }
+                                <div>
+                                  <strong class="d-block text-dark small ">{{ ag.nom }}</strong>
+                                  <small class="text-muted d-block text-truncate" style="max-width: 120px;">
+                                    {{ ag.description || 'Agence immobilière partenaire' }}
+                                  </small>
+                                </div>
+                              </div>
+                              <div class="d-blok d-lg-none">
                                 @if (ag.logo_url) {
                                   <img [src]="ag.logo_url" [alt]="ag.nom" class="rounded-3 object-fit-cover shadow-sm border" style="width: 44px; height: 44px;">
                                 } @else {
@@ -785,12 +800,12 @@ Chart.register(...registerables);
                                 </div>
                               </div>
                             </td>
-                            <td>
+                            <!-- <td>
                               <span class="small fw-medium text-dark"><i class="bi bi-geo-alt text-danger me-1"></i>{{ ag.ville }}</span>
                               @if (ag.adresse) {
                                 <small class="d-block text-muted">{{ ag.adresse }}</small>
                               }
-                            </td>
+                            </td> -->
                             <td>
                               @if (ag.telephone) {
                                 <div class="small"><i class="bi bi-telephone text-primary me-1"></i>{{ ag.telephone }}</div>
@@ -799,15 +814,15 @@ Chart.register(...registerables);
                                 <small class="text-muted d-block"><i class="bi bi-envelope text-secondary me-1"></i>{{ ag.email }}</small>
                               }
                             </td>
-                            <td>
+                            <!-- <td>
                               <span class="badge bg-light text-dark border px-2 py-1 small">
                                 {{ ag.nombre_biens || 0 }} bien(s)
                               </span>
-                            </td>
+                            </td> -->
                             <td>
                               @if (ag.est_partenaire_certifie) {
                                 <span class="badge rounded-2 px-3 py-1" style="background: rgba(20, 184, 166, 0.15); color: #0f766e;">
-                                  <i class="bi bi-patch-check-fill me-1"></i> Partenaire Certifié
+                                  <i class="bi bi-patch-check-fill me-1"></i> Certifié
                                 </span>
                               } @else {
                                 <span class="badge rounded-2 bg-secondary bg-opacity-10 text-secondary px-3 py-1">
@@ -816,11 +831,31 @@ Chart.register(...registerables);
                               }
                             </td>
                             <td class="text-end">
-                              @if (ag.site_web) {
-                                <a [href]="ag.site_web" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm rounded-2 px-3" title="Visiter le site web">
-                                  <i class="bi bi-box-arrow-up-right me-1"></i> Site
-                                </a>
-                              }
+                              <div class="d-flex align-items-center justify-content-end gap-1 flex-wrap">
+                                <button class="btn btn-outline-secondary btn-sm rounded-2" 
+                                        (click)="toggleCertifAgence(ag)" 
+                                        title="{{ ag.est_partenaire_certifie ? 'Retirer la certification partenaire' : 'Certifier comme agence partenaire' }}">
+                                  <i class="bi" [class.bi-patch-check-fill]="ag.est_partenaire_certifie" [class.bi-patch-check]="!ag.est_partenaire_certifie" [class.text-success]="ag.est_partenaire_certifie"></i>
+                                  <!-- <span class="d-none d-xl-inline ms-1">{{ ag.est_partenaire_certifie ? 'Certifié' : 'Non certifié' }}</span> -->
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm rounded-2" 
+                                        (click)="ouvrirEditAgenceModal(ag)" 
+                                        title="Modifier les coordonnées et informations de l'agence">
+                                  <i class="bi bi-pencil-square"></i>
+                                  <!-- <span class="d-none d-lg-inline ms-1">Modifier</span> -->
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm rounded-2" 
+                                        (click)="confirmerSupprimerAgence(ag)" 
+                                        title="Supprimer définitivement cette agence">
+                                  <i class="bi bi-trash"></i>
+                                  <!-- <span class="d-none d-lg-inline ms-1">Supprimer</span> -->
+                                </button>
+                                @if (ag.site_web) {
+                                  <a [href]="ag.site_web" target="_blank" rel="noopener noreferrer" class="btn btn-light btn-sm rounded-2 border" title="Visiter le site officiel">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                  </a>
+                                }
+                              </div>
                             </td>
                           </tr>
                         }
@@ -869,8 +904,8 @@ Chart.register(...registerables);
                     </div>
 
                     <div>
-                      <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                        <h2 class="h5 fw-bold text-dark mb-0">{{ currentUser()?.name || 'Gestionnaire' }}</h2>
+                      <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <h2 class="h4 fw-bold text-dark mb-0 ">{{ currentUser()?.name || 'Gestionnaire' }}</h2>
                         <span class="badge bg-warning text-dark border border-warning border-opacity-25 rounded-2 px-2 py-1 small fw-semibold">
                           <i class="bi bi-shield-check me-1"></i>Gestionnaire Immobilier
                         </span>
@@ -936,17 +971,17 @@ Chart.register(...registerables);
                       </div>
                       <div>
                         <h2 class="h6 fw-bold text-dark mb-0">Informations Personnelles</h2>
-                        <small class="text-muted" style="font-size: 11px;">Gérez vos coordonnées officielles enregistrées</small>
+                        <small class="text-muted" style="font-size: 11px;">Gérez vos coordonnées officielles</small>
                       </div>
                     </div>
 
                     @if (!modeEditionProfil) {
                       <button type="button" class="btn btn-outline-primary btn-sm rounded-2 px-3 fw-semibold shadow-sm" (click)="activerEditionProfil()">
-                        <i class="bi bi-pencil-square me-1"></i> Modifier mes coordonnées
+                        <i class="bi bi-pencil-square me-1"></i>
                       </button>
                     } @else {
-                      <button type="button" class="btn btn-light btn-sm rounded-2 px-3 border" (click)="annulerEditionProfil()" [disabled]="isSavingProfile">
-                        Annuler
+                      <button type="button" class="btn btn-outline-danger btn-sm rounded-2 px-3 fw-semibold shadow-sm" (click)="annulerEditionProfil()" [disabled]="isSavingProfile">
+                       <i class="bi bi-x-circle"></i>
                       </button>
                     }
                   </div>
@@ -1037,7 +1072,7 @@ Chart.register(...registerables);
                           @if (isSavingProfile) {
                             <span class="spinner-border spinner-border-sm me-1"></span> Enregistrement...
                           } @else {
-                            <i class="bi bi-check2 me-1"></i> Enregistrer les modifications
+                            <i class="bi bi-check2 me-1"></i> Enregistrer
                           }
                         </button>
                       </div>
@@ -1334,8 +1369,8 @@ Chart.register(...registerables);
                   <i class="bi bi-buildings-fill fs-5"></i>
                 </div>
                 <div>
-                  <h5 class="modal-title fw-bold mb-0 text-dark">Ajouter une Agence Immobilière</h5>
-                  <small class="text-muted">Enregistrez une agence partenaire certifiée dans la base de données</small>
+                  <h5 class="modal-title fw-bold mb-0 text-dark">{{ modeEditionAgence ? 'Modifier l\'Agence Immobilière' : 'Ajouter une Agence Immobilière' }}</h5>
+                  <small class="text-muted">{{ modeEditionAgence ? 'Mettez à jour les coordonnées et informations de l\'agence dans la base de données' : 'Enregistrez une agence partenaire certifiée dans la base de données' }}</small>
                 </div>
               </div>
               <button type="button" class="btn-close" (click)="fermerAddAgenceModal()"></button>
@@ -1396,6 +1431,15 @@ Chart.register(...registerables);
                   <!-- Logo Upload -->
                   <div class="col-md-6">
                     <label class="form-label small fw-semibold text-dark">Logo ou photo de l'agence</label>
+                    @if (existingLogoUrl && !selectedLogoFile) {
+                      <div class="d-flex align-items-center gap-2 mb-2 p-2 bg-light rounded-3 border">
+                        <img [src]="existingLogoUrl" alt="Logo actuel" class="rounded-2 object-fit-cover border" style="width: 36px; height: 36px;">
+                        <div class="small">
+                          <span class="d-block text-dark fw-semibold" style="font-size: 12px;">Logo actuel enregistré</span>
+                          <span class="text-muted" style="font-size: 11px;">Sélectionnez un nouveau fichier ci-dessous pour le remplacer</span>
+                        </div>
+                      </div>
+                    }
                     <input type="file" class="form-control rounded-3" accept="image/*" (change)="onLogoSelect($event)">
                     <small class="text-muted" style="font-size: 11px;">PNG, JPG ou WEBP (max 5 Mo)</small>
                   </div>
@@ -1427,8 +1471,8 @@ Chart.register(...registerables);
                       <span class="spinner-border spinner-border-sm me-1" role="status"></span>
                       <span>Enregistrement en cours...</span>
                     } @else {
-                      <i class="bi bi-check-circle-fill me-1"></i>
-                      <span>Enregistrer l'agence</span>
+                      <i class="bi {{ modeEditionAgence ? 'bi-check2-circle' : 'bi-check-circle-fill' }} me-1"></i>
+                      <span>{{ modeEditionAgence ? 'Enregistrer les modifications' : 'Enregistrer l\'agence' }}</span>
                     }
                   </button>
                 </div>
@@ -1481,6 +1525,9 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
   agenceSuccessMsg = '';
   agenceErrorMsg = '';
   selectedLogoFile: File | null = null;
+  modeEditionAgence = false;
+  editingAgenceId: number | null = null;
+  existingLogoUrl: string | null = null;
   newAgence = {
     nom: '',
     ville: '',
@@ -2144,6 +2191,9 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   ouvrirAddAgenceModal(): void {
+    this.modeEditionAgence = false;
+    this.editingAgenceId = null;
+    this.existingLogoUrl = null;
     this.showAddAgenceModal = true;
     this.agenceSuccessMsg = '';
     this.agenceErrorMsg = '';
@@ -2162,8 +2212,33 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
     this.cdr.markForCheck();
   }
 
+  ouvrirEditAgenceModal(ag: Agence): void {
+    this.modeEditionAgence = true;
+    this.editingAgenceId = ag.id;
+    this.existingLogoUrl = ag.logo_url || null;
+    this.showAddAgenceModal = true;
+    this.agenceSuccessMsg = '';
+    this.agenceErrorMsg = '';
+    this.agenceSaving = false;
+    this.selectedLogoFile = null;
+    this.newAgence = {
+      nom: ag.nom || '',
+      ville: ag.ville || '',
+      adresse: ag.adresse || '',
+      telephone: ag.telephone || '',
+      email: ag.email || '',
+      site_web: ag.site_web || '',
+      description: ag.description || '',
+      est_partenaire_certifie: !!ag.est_partenaire_certifie
+    };
+    this.cdr.markForCheck();
+  }
+
   fermerAddAgenceModal(): void {
     this.showAddAgenceModal = false;
+    this.modeEditionAgence = false;
+    this.editingAgenceId = null;
+    this.existingLogoUrl = null;
     this.selectedLogoFile = null;
     this.cdr.markForCheck();
   }
@@ -2173,6 +2248,46 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
     if (input.files && input.files[0]) {
       this.selectedLogoFile = input.files[0];
     }
+  }
+
+  confirmerSupprimerAgence(ag: Agence): void {
+    this.modalAlert.confirm(
+      `Êtes-vous sûr de vouloir supprimer définitivement l'agence partenaire « ${ag.nom} » ? Cette action est irréversible.`,
+      'Supprimer l\'agence',
+      'Oui, supprimer',
+      'Annuler'
+    ).then((confirmed: boolean) => {
+      if (!confirmed) return;
+      this.agenceService.supprimerAgence(ag.id).subscribe({
+        next: () => {
+          this.agencesAdmin = this.agencesAdmin.filter(a => a.id !== ag.id);
+          this.modalAlert.success(`L'agence « ${ag.nom} » a été supprimée avec succès.`, 'Agence Supprimée');
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+          this.modalAlert.error(err?.error?.message || 'Erreur lors de la suppression de l\'agence', 'Erreur');
+          this.cdr.markForCheck();
+        }
+      });
+    });
+  }
+
+  toggleCertifAgence(ag: Agence): void {
+    this.agenceService.toggleCertification(ag.id).subscribe({
+      next: (res) => {
+        ag.est_partenaire_certifie = res.est_partenaire_certifie;
+        this.modalAlert.info(
+          `Statut de l'agence « ${ag.nom} » mis à jour : ${ag.est_partenaire_certifie ? 'Partenaire Certifié' : 'Standard'}.`,
+          'Certification modifiée'
+        );
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.modalAlert.error(err?.error?.message || 'Erreur lors de la modification du statut', 'Erreur');
+      }
+    });
   }
 
   soumettreAgence(): void {
@@ -2213,25 +2328,49 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
       };
     }
 
-    this.agenceService.ajouterAgence(payload).subscribe({
-      next: (created) => {
-        this.agenceSaving = false;
-        this.agenceSuccessMsg = `L'agence « ${created.nom} » a été enregistrée avec succès !`;
-        // Actualiser immédiatement la liste locale
-        this.agencesAdmin = [created, ...this.agencesAdmin.filter(a => a.id !== created.id)];
-        // Notification globale stylisée
-        this.modalAlert.success(`L'agence « ${created.nom} » a été enregistrée avec succès et ajoutée au réseau de la plateforme.`, 'Agence Ajoutée');
-        setTimeout(() => {
-          this.fermerAddAgenceModal();
-        }, 1500);
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        this.agenceSaving = false;
-        this.agenceErrorMsg = err?.error?.message || 'Erreur lors de l\'enregistrement de l\'agence. Veuillez vérifier les informations.';
-        this.cdr.markForCheck();
-      }
-    });
+    if (this.modeEditionAgence && this.editingAgenceId) {
+      // MODE MODIFICATION
+      this.agenceService.modifierAgence(this.editingAgenceId, payload).subscribe({
+        next: (updated) => {
+          this.agenceSaving = false;
+          this.agenceSuccessMsg = `L'agence « ${updated.nom} » a été modifiée avec succès !`;
+          this.agencesAdmin = this.agencesAdmin.map(a => a.id === updated.id ? { ...a, ...updated } : a);
+          this.modalAlert.success(`Les modifications de l'agence « ${updated.nom} » ont été enregistrées avec succès.`, 'Agence Modifiée');
+          setTimeout(() => {
+            this.fermerAddAgenceModal();
+          }, 1200);
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.agenceSaving = false;
+          this.agenceErrorMsg = err?.error?.message || 'Erreur lors de la modification de l\'agence. Veuillez vérifier les informations.';
+          this.cdr.markForCheck();
+        }
+      });
+    } else {
+      // MODE AJOUT
+      this.agenceService.ajouterAgence(payload).subscribe({
+        next: (created) => {
+          this.agenceSaving = false;
+          this.agenceSuccessMsg = `L'agence « ${created.nom} » a été enregistrée avec succès !`;
+          // Actualiser immédiatement la liste locale
+          this.agencesAdmin = [created, ...this.agencesAdmin.filter(a => a.id !== created.id)];
+          // Notification globale stylisée
+          this.modalAlert.success(`L'agence « ${created.nom} » a été enregistrée avec succès et ajoutée au réseau de la plateforme.`, 'Agence Ajoutée');
+          setTimeout(() => {
+            this.fermerAddAgenceModal();
+          }, 1200);
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.agenceSaving = false;
+          this.agenceErrorMsg = err?.error?.message || 'Erreur lors de l\'enregistrement de l\'agence. Veuillez vérifier les informations.';
+          this.cdr.markForCheck();
+        }
+      });
+    }
   }
 
   // ============================================================

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
-import { catchError, tap, finalize } from 'rxjs/operators';
+import { catchError, tap, finalize, map } from 'rxjs/operators';
 import { Agence } from '../models/models';
 import { AuthService } from './auth.service';
 
@@ -74,29 +74,91 @@ export class AgenceService {
     );
   }
 
+  private getHeaders(isFormData = false): { headers: HttpHeaders } {
+    const token = this.auth.token();
+    if (isFormData) {
+      return {
+        headers: new HttpHeaders({
+          'Accept': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        })
+      };
+    }
+    return { headers: this.auth.getAuthHeaders() };
+  }
+
   /**
    * Ajout d'une agence par l'administrateur avec persistance BDD et support d'upload
    */
   public ajouterAgence(data: FormData | Partial<Agence>): Observable<Agence> {
-    const headers = this.auth.getAuthHeaders();
+    const isFormData = data instanceof FormData;
+    const options = this.getHeaders(isFormData);
 
-    return this.http.post<Agence>(`${this.apiUrl}/admin/agences`, data, { headers }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/admin/agences`, data, options).pipe(
+      map(res => (res?.agence || res?.data || res) as Agence),
       tap(created => {
         if (created && created.id) {
-          const actuelles = [created, ...this.agencesSubject.value];
+          const actuelles = [created, ...this.agencesSubject.value.filter(a => a.id !== created.id)];
           this.agencesSubject.next(actuelles);
         }
       }),
       catchError(err => {
-        // Tentative sur la route /agences si /admin/agences renvoie 404
-        return this.http.post<Agence>(`${this.apiUrl}/agences`, data).pipe(
+        return this.http.post<any>(`${this.apiUrl}/agences`, data).pipe(
+          map(res => (res?.agence || res?.data || res) as Agence),
           tap(created => {
             if (created && created.id) {
-              const actuelles = [created, ...this.agencesSubject.value];
+              const actuelles = [created, ...this.agencesSubject.value.filter(a => a.id !== created.id)];
               this.agencesSubject.next(actuelles);
             }
           })
         );
+      })
+    );
+  }
+
+  /**
+   * Modification d'une agence existante avec mise à jour immédiate
+   */
+  public modifierAgence(id: number, data: FormData | Partial<Agence>): Observable<Agence> {
+    const isFormData = data instanceof FormData;
+    const options = this.getHeaders(isFormData);
+
+    return this.http.post<any>(`${this.apiUrl}/admin/agences/${id}`, data, options).pipe(
+      map(res => (res?.agence || res?.data || res) as Agence),
+      tap(updated => {
+        if (updated && updated.id) {
+          const actuelles = this.agencesSubject.value.map(a => a.id === updated.id ? { ...a, ...updated } : a);
+          this.agencesSubject.next(actuelles);
+        }
+      })
+    );
+  }
+
+  /**
+   * Suppression d'une agence partenaire
+   */
+  public supprimerAgence(id: number): Observable<any> {
+    const options = this.getHeaders(false);
+    return this.http.delete<any>(`${this.apiUrl}/admin/agences/${id}`, options).pipe(
+      tap(() => {
+        const actuelles = this.agencesSubject.value.filter(a => a.id !== id);
+        this.agencesSubject.next(actuelles);
+      })
+    );
+  }
+
+  /**
+   * Basculer le statut certifié d'une agence
+   */
+  public toggleCertification(id: number): Observable<Agence> {
+    const options = this.getHeaders(false);
+    return this.http.patch<any>(`${this.apiUrl}/admin/agences/${id}/toggle-certification`, {}, options).pipe(
+      map(res => (res?.agence || res?.data || res) as Agence),
+      tap(updated => {
+        if (updated && updated.id) {
+          const actuelles = this.agencesSubject.value.map(a => a.id === updated.id ? { ...a, ...updated } : a);
+          this.agencesSubject.next(actuelles);
+        }
       })
     );
   }

@@ -61,7 +61,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                 style="width: 40px; height: 40px;">
                 @if (currentStep === 4) { <i class="bi bi-check-lg"></i> } @else { 3 }
               </div>
-              <span class="small fw-semibold mt-1" [class.text-primary]="currentStep === 3">Paiement Phase 2</span>
+              <span class="small fw-semibold mt-1" [class.text-primary]="currentStep === 3">Paiement</span>
             </div>
 
             <!-- Étape 4 -->
@@ -89,7 +89,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
               @if (currentStep === 1) {
                 <div>
                   <h2 class="h5 fw-bold mb-3 text-dark">
-                    <span class="badge bg-primary text-white rounded-pill me-2">Étape 1</span>
+                    <span class="badge bg-primary text-white rounded-2 me-2">Étape 1</span>
                     Choix des dates de séjour
                   </h2>
                   <p class="text-muted small">Indiquez la période souhaitée pour le calcul automatique du loyer et de la caution.</p>
@@ -137,7 +137,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
               @if (currentStep === 2) {
                 <div>
                   <h2 class="h5 fw-bold mb-3 text-dark">
-                    <span class="badge bg-primary text-white rounded-pill me-2">Étape 2</span>
+                    <span class="badge bg-primary text-white rounded-2 me-2">Étape 2</span>
                     Récapitulatif des montants & conditions
                   </h2>
 
@@ -212,8 +212,8 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                   <h2 class="h4 fw-bold text-dark mb-2">Demande envoyée avec succès !</h2>
                   <p class="text-muted mb-1">Référence dossier : <strong class="text-dark">#DEM-{{ activeReservation?.id }}</strong></p>
                   <p class="text-muted small mb-4" style="max-width: 480px; margin: 0 auto;">
-                    Le gestionnaire examine actuellement votre dossier locataire (pièce d'identité, justificatifs de revenus, score). 
-                    Vous recevrez un message dans votre <strong>espace Messagerie</strong> dès validation ou refus.
+                    Le gestionnaire examine actuellement votre dossier locataire (pièce d'identité, score). 
+                    Vous recevrez un message dans votre <strong>Boite mail</strong>, ainsi qu'une notification dans votre <strong>espace</strong> dès validation ou refus.
                   </p>
 
                   <div class="p-4 bg-light rounded-4 text-start mb-4" style="max-width: 480px; margin: 0 auto;">
@@ -228,18 +228,18 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                     </div>
                     <div class="d-flex align-items-start gap-3">
                       <span class="badge bg-warning text-dark rounded-circle flex-shrink-0" style="width:24px;height:24px;line-height:24px;padding:0;text-align:center;">3</span>
-                      <span class="small text-muted">Si validée, un lien de paiement sécurisé Phase 2 vous sera transmis directement</span>
+                      <span class="small text-muted">Si validée, un lien de paiement sécurisé vous sera transmis directement</span>
                     </div>
                   </div>
 
                   <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                    <a routerLink="/locataire" [queryParams]="{tab: 'messagerie'}" class="btn btn-primary px-4 py-2 rounded-pill">
+                    <a routerLink="/locataire" [queryParams]="{tab: 'messagerie'}" class="btn btn-primary px-4 py-2 rounded-2">
                       <i class="bi bi-chat-dots me-2"></i>Consulter ma Messagerie
                       @if (nbNonLusMessages > 0) {
-                        <span class="badge bg-white text-primary ms-1 rounded-pill small">{{ nbNonLusMessages }}</span>
+                        <span class="badge bg-white text-primary ms-1 rounded-2 small">{{ nbNonLusMessages }}</span>
                       }
                     </a>
-                    <a routerLink="/locataire" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
+                    <a routerLink="/locataire" class="btn btn-outline-secondary px-4 py-2 rounded-2">
                       <i class="bi bi-house me-1"></i> Mon espace locataire
                     </a>
                   </div>
@@ -252,7 +252,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
               @if (currentStep === 3) {
                 <div>
                   <h2 class="h5 fw-bold mb-3 text-dark">
-                    <span class="badge bg-primary text-white rounded-pill me-2">Étape 3</span>
+                    <span class="badge bg-primary text-white rounded-2 me-2">Étape 3</span>
                     Paiement en ligne sécurisé
                   </h2>
                   <p class="text-muted small">Sélectionnez votre moyen de paiement privilégié (Carte Bancaire ou Mobile Money).</p>
@@ -385,7 +385,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                           <small class="text-muted" style="font-size: 11px;">Réf : CTR-SN-2026-{{ activeReservation?.id || '01' }} • Caution légale plafonnée à 2 mois</small>
                         </div>
                       </div>
-                      <button type="button" class="btn btn-sm rounded-pill px-3 fw-bold" [ngClass]="contratAccepte ? 'btn-outline-success' : 'btn-danger text-white'" (click)="showContratModal = true">
+                      <button type="button" class="btn btn-sm rounded-2 px-3 fw-bold" [ngClass]="contratAccepte ? 'btn-outline-success' : 'btn-danger text-white'" (click)="showContratModal = true">
                         <i class="bi bi-eye-fill me-1"></i> Lire le contrat complet
                       </button>
                     </div>
@@ -488,7 +488,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                     </button>
                   </div>
 
-                  <a routerLink="/locataire" class="btn btn-primary px-4 py-2 rounded-pill">
+                  <a routerLink="/locataire" class="btn btn-primary px-4 py-2 rounded-2">
                     Accéder à mon espace locataire <i class="bi bi-arrow-right ms-1"></i>
                   </a>
                 </div>
@@ -534,7 +534,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                   <i class="bi bi-hourglass-split display-5 text-warning"></i>
                 </div>
                 <h3 class="h4 fw-bold text-dark mb-1">Demande en attente de validation</h3>
-                <span class="badge bg-warning bg-opacity-20 text-dark border border-warning border-opacity-50 px-3 py-1 rounded-pill small mb-3">
+                <span class="badge bg-warning bg-opacity-20 text-dark border border-warning border-opacity-50 px-3 py-1 rounded-2 small mb-3">
                   Transmise au gestionnaire avec succès
                 </span>
                 
@@ -562,10 +562,10 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                 </div>
 
                 <div class="d-grid gap-2">
-                  <a routerLink="/locataire" [queryParams]="{ tab: 'reservations' }" class="btn btn-primary rounded-pill py-2 fw-semibold">
+                  <a routerLink="/locataire" [queryParams]="{ tab: 'reservations' }" class="btn btn-primary rounded-2 py-2 fw-semibold">
                     <i class="bi bi-folder-check me-2"></i>Consulter mes réservations
                   </a>
-                  <a routerLink="/locataire" [queryParams]="{ tab: 'messagerie' }" class="btn btn-outline-primary rounded-pill py-2">
+                  <a routerLink="/locataire" [queryParams]="{ tab: 'messagerie' }" class="btn btn-outline-primary rounded-2 py-2">
                     <i class="bi bi-chat-dots me-2"></i>Accéder à ma messagerie
                   </a>
                   <button type="button" class="btn btn-link text-muted btn-sm" (click)="fermerDemandeModal()">
@@ -649,14 +649,14 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
               </div>
 
               <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-between align-items-center">
-                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" (click)="showContratModal = false">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-2 px-3" (click)="showContratModal = false">
                   Fermer
                 </button>
                 <div class="d-flex gap-2">
-                  <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" (click)="imprimerContrat()">
+                  <button type="button" class="btn btn-outline-primary btn-sm rounded-2 px-3" (click)="imprimerContrat()">
                     <i class="bi bi-printer me-1"></i> Imprimer le bail
                   </button>
-                  <button type="button" class="btn btn-success btn-sm rounded-pill px-4 fw-bold" (click)="accepterContratDepuisModal()">
+                  <button type="button" class="btn btn-success btn-sm rounded-2 px-4 fw-bold" (click)="accepterContratDepuisModal()">
                     <i class="bi bi-check2-circle me-1"></i> J'accepte les conditions
                   </button>
                 </div>
@@ -687,7 +687,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                       <small class="text-muted">Agrément Séquestre Tiers n° SN-CDP-2026/04</small>
                     </div>
                     <div class="text-end">
-                      <span class="badge bg-success text-white px-3 py-2 fs-6 rounded-pill">PAIEMENT CONFIRMÉ</span>
+                      <span class="badge bg-success text-white px-3 py-2 fs-6 rounded-2">PAIEMENT CONFIRMÉ</span>
                       <small class="d-block text-muted mt-1 font-monospace">Réf : {{ lastPaymentResult?.paiement?.reference_transaction || 'REC-SN-2026-89421' }}</small>
                     </div>
                   </div>
@@ -747,8 +747,8 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                 </div>
               </div>
               <div class="modal-footer border-top bg-light px-4 py-3 gap-2">
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" (click)="showRecuModal = false">Fermer</button>
-                <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold" (click)="imprimerRecu()">
+                <button type="button" class="btn btn-outline-secondary rounded-2 px-3" (click)="showRecuModal = false">Fermer</button>
+                <button type="button" class="btn btn-primary rounded-2 px-4 fw-bold" (click)="imprimerRecu()">
                   <i class="bi bi-printer me-1"></i> Imprimer ce Reçu Officiel
                 </button>
               </div>
@@ -804,8 +804,8 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                 </div>
               </div>
               <div class="modal-footer border-top bg-light px-4 py-3 gap-2">
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" (click)="showContratFinalModal = false">Fermer</button>
-                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold" (click)="imprimerContrat()">
+                <button type="button" class="btn btn-outline-secondary rounded-2 px-3" (click)="showContratFinalModal = false">Fermer</button>
+                <button type="button" class="btn btn-success rounded-2 px-4 fw-bold" (click)="imprimerContrat()">
                   <i class="bi bi-printer me-1"></i> Imprimer le Contrat de Bail
                 </button>
               </div>
@@ -847,8 +847,8 @@ export class ReservationFlowComponent implements OnInit {
   get stepperProgress(): number {
     if (this.currentStep === 1) return 0;
     if (this.currentStep === 2) return 33.33;
-    if (this.currentStep === 25) return 50;
-    if (this.currentStep === 3) return 66.66;
+    if (this.currentStep === 25) return 66.66;
+    if (this.currentStep === 3) return 99.99;
     if (this.currentStep >= 4) return 100;
     return 0;
   }

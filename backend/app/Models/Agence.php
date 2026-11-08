@@ -29,4 +29,18 @@ class Agence extends Model
         'est_partenaire_certifie' => 'boolean',
         'nombre_biens' => 'integer',
     ];
+
+    /**
+     * Accesseur pour garantir une URL de logo absolue
+     */
+    public function getLogoUrlAttribute($value)
+    {
+        if (!$value) {
+            return null;
+        }
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://') || str_starts_with($value, 'data:')) {
+            return $value;
+        }
+        return url($value);
+    }
 }

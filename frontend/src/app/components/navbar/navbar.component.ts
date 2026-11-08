@@ -82,7 +82,7 @@ import { AuthService } from '../../services/auth.service';
           <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
             @if (currentUser()) {
               <!-- Utilisateur Connecté : Menu profil -->
-              <div class="dropdown">
+              <div class="dropdown shadow-sm">
                 <button class="btn btn-outline-light btn-sm dropdown-toggle rounded-2 px-3 py-1 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
                   @if (avatarUrl) {
                     <img [src]="avatarUrl" (error)="onAvatarError()" alt="" style="width: 28px; height: 28px; object-fit: cover;" class="rounded-circle shadow-sm">
