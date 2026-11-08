@@ -227,15 +227,17 @@ export class ReservationService {
     );
   }
 
-  // REJET PAR LE GESTIONNAIRE : avec motif obligatoire
-  refuserReservation(id: number, motif: string): Observable<any> {
+  // REJET PAR LE GESTIONNAIRE : avec motif facultatif
+  refuserReservation(id: number, motif?: string): Observable<any> {
     const headers = this.auth.getAuthHeaders();
     const all = this.getReservationsFromStorage();
     const res = all.find(r => r.id === id);
 
+    const motifFinal = motif?.trim() ? motif.trim() : '';
+
     if (res) {
       res.statut = 'refusee';
-      res.motif_refus = motif;
+      res.motif_refus = motifFinal || undefined;
       this.saveReservationsToStorage(all);
 
       const adminNom = this.auth.currentUser()?.name || res.logement?.admin?.name || 'Moussa Ndiaye (Gestionnaire)';
@@ -244,14 +246,14 @@ export class ReservationService {
       this.messageService.emettreRefusGestionnaire(
         res,
         res.logement?.titre || 'Logement',
-        motif,
+        motifFinal,
         adminNom
       );
     }
 
-    return this.http.post(`${this.apiUrl}/admin/reservations/${id}/refuser`, { motif }, { headers }).pipe(
+    return this.http.post(`${this.apiUrl}/admin/reservations/${id}/refuser`, { motif: motifFinal || null }, { headers }).pipe(
       catchError(() => of({
-        message: 'Réservation refusée. Motif notifié au locataire.',
+        message: 'Réservation refusée. Statut et e-mail notifiés au locataire.',
         reservation: res
       }))
     );

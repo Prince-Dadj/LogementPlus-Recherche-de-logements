@@ -18,10 +18,13 @@ class DashboardController extends Controller
     // RF-70 & RF-73 : Tableau de bord et indicateurs pour l'admin (gestionnaire)
     public function statsAdmin(Request $request)
     {
-        $adminId = $request->user()->id;
+        $user = $request->user();
+        $adminId = $user->id;
+        $isSuperAdmin = ($user->role === 'superadmin');
         $annee = (int) $request->get('annee', date('Y'));
 
-        $logementIds = Logement::where('admin_id', $adminId)->pluck('id');
+        $logementQuery = $isSuperAdmin ? Logement::query() : Logement::where('admin_id', $adminId);
+        $logementIds = (clone $logementQuery)->pluck('id');
         $nbLogements = $logementIds->count();
 
         $reservationsQuery = Reservation::whereIn('logement_id', $logementIds);
@@ -38,7 +41,7 @@ class DashboardController extends Controller
         $tauxOccupation = $nbLogements > 0 ? min(100, round(($reservationsConfirmees / ($nbLogements * 2)) * 100, 1)) : 0;
 
         // Répartition par type de logement (RF-70)
-        $repartitionTypes = Logement::where('admin_id', $adminId)
+        $repartitionTypes = (clone $logementQuery)
             ->select('type', DB::raw('count(*) as total'))
             ->groupBy('type')
             ->get();

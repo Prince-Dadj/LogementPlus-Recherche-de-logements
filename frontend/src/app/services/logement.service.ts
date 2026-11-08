@@ -372,32 +372,136 @@ export class LogementService {
           this.saveCatalogToStorage();
         }
       }),
-      map((list: Logement[]) => list.map(l => {
-        const isOcc = this.estLogementOccupe(l.id);
-        const log: Logement = { ...l, est_occupe: isOcc, statut_occupation: isOcc ? 'occupe' : 'disponible' };
-        return log;
-      })),
+      map((list: Logement[]) => {
+        const enhancedBackend: Logement[] = (list || []).map(l => {
+          const isOcc = this.estLogementOccupe(l.id);
+          const occStatus: 'occupe' | 'disponible' = isOcc ? 'occupe' : 'disponible';
+          return { ...l, est_occupe: isOcc, statut_occupation: occStatus };
+        });
+
+        const backendIds = new Set(enhancedBackend.map(b => b.id));
+        const localPublies: Logement[] = this.catalogueLogements
+          .filter(l => l.statut === 'publie' && !backendIds.has(l.id))
+          .map(l => {
+            const isOcc = this.estLogementOccupe(l.id);
+            const occStatus: 'occupe' | 'disponible' = isOcc ? 'occupe' : 'disponible';
+            return { ...l, est_occupe: isOcc, statut_occupation: occStatus };
+          });
+
+        const all: Logement[] = [...enhancedBackend, ...localPublies];
+        return this.filterLogementsList(all, filters);
+      }),
       catchError(() => {
-        // En cas d'indisponibilité de l'API Laravel : filtres appliqués sur le catalogue local
-        let result = this.getSenegalCatalog();
-        if (filters.q && filters.q.trim()) {
-          const q = filters.q.toLowerCase().trim();
-          result = result.filter(l =>
-            l.titre.toLowerCase().includes(q) ||
-            l.ville.toLowerCase().includes(q) ||
-            (l.quartier && l.quartier.toLowerCase().includes(q)) ||
-            l.adresse.toLowerCase().includes(q)
-          );
-        }
-        if (filters.type && filters.type !== 'tous') {
-          result = result.filter(l => l.type === filters.type);
-        }
-        if (filters.prix_max && Number(filters.prix_max) > 0) {
-          result = result.filter(l => l.prix_par_mois <= Number(filters.prix_max));
-        }
-        return of(result);
+        const catalog = this.getSenegalCatalog();
+        return of(this.filterLogementsList(catalog, filters));
       })
     );
+  }
+
+  // ─────────────────────────────────────────────
+  // Filtrage précis et rigoureux multi-critères
+  // ─────────────────────────────────────────────
+  filterLogementsList(list: Logement[], filters: any = {}): Logement[] {
+    let result = (list || []).filter(l => l.statut === 'publie');
+
+    // 1. Recherche plein texte
+    if (filters.q && filters.q.trim()) {
+      const q = filters.q.toLowerCase().trim();
+      result = result.filter(l =>
+        (l.titre && l.titre.toLowerCase().includes(q)) ||
+        (l.description && l.description.toLowerCase().includes(q)) ||
+        (l.ville && l.ville.toLowerCase().includes(q)) ||
+        (l.quartier && l.quartier.toLowerCase().includes(q)) ||
+        (l.adresse && l.adresse.toLowerCase().includes(q))
+      );
+    }
+
+    // 2. Ville exacte
+    if (filters.ville && filters.ville !== 'toutes' && filters.ville !== 'tous') {
+      const v = filters.ville.toLowerCase().trim();
+      result = result.filter(l => (l.ville || '').toLowerCase().trim() === v);
+    }
+
+    // 3. Quartier
+    if (filters.quartier && filters.quartier !== 'tous' && filters.quartier.trim()) {
+      const q = filters.quartier.toLowerCase().trim();
+      result = result.filter(l => (l.quartier || '').toLowerCase().trim().includes(q));
+    }
+
+    // 4. Type de bien
+    if (filters.type && filters.type !== 'tous' && filters.type !== 'toutes') {
+      result = result.filter(l => (l.type || '').toLowerCase() === filters.type.toLowerCase());
+    }
+
+    // 5. Fourchette de prix : Min & Max
+    if (filters.prix_min !== null && filters.prix_min !== undefined && Number(filters.prix_min) > 0) {
+      result = result.filter(l => Number(l.prix_par_mois) >= Number(filters.prix_min));
+    }
+    if (filters.prix_max !== null && filters.prix_max !== undefined && Number(filters.prix_max) > 0) {
+      result = result.filter(l => Number(l.prix_par_mois) <= Number(filters.prix_max));
+    }
+
+    // 6. Surface : Min & Max
+    if (filters.surface_min !== null && filters.surface_min !== undefined && Number(filters.surface_min) > 0) {
+      result = result.filter(l => Number(l.surface) >= Number(filters.surface_min));
+    }
+    if (filters.surface_max !== null && filters.surface_max !== undefined && Number(filters.surface_max) > 0) {
+      result = result.filter(l => Number(l.surface) <= Number(filters.surface_max));
+    }
+
+    // 7. Nombre de pièces min
+    if (filters.nb_pieces !== null && filters.nb_pieces !== undefined && Number(filters.nb_pieces) > 0) {
+      result = result.filter(l => Number(l.nb_pieces || 1) >= Number(filters.nb_pieces));
+    }
+
+    // 8. Meublé (true, false, ou 'tous')
+    if (filters.meuble !== null && filters.meuble !== undefined && filters.meuble !== '' && filters.meuble !== 'tous') {
+      const meubleBool = String(filters.meuble) === 'true';
+      result = result.filter(l => !!l.meuble === meubleBool);
+    }
+
+    // 9. Disponibilité
+    if (filters.disponibilite === 'disponible') {
+      result = result.filter(l => !l.est_occupe && l.statut_occupation !== 'occupe');
+    }
+
+    // 10. Mode réservation
+    if (filters.mode_reservation && filters.mode_reservation !== 'tous') {
+      result = result.filter(l => l.mode_reservation === filters.mode_reservation);
+    }
+
+    // 11. Équipements
+    if (filters.equipements) {
+      const eqReq: string[] = Array.isArray(filters.equipements)
+        ? filters.equipements.map((x: any) => String(x).toLowerCase().trim())
+        : String(filters.equipements).split(',').map(s => s.toLowerCase().trim()).filter(Boolean);
+
+      if (eqReq.length > 0) {
+        result = result.filter(l => {
+          const logEqNoms = (l.equipements || []).map((e: any) => (e.nom || e.name || '').toLowerCase().trim());
+          const logEqIds = (l.equipements || []).map((e: any) => String(e.id));
+          return eqReq.every(req => logEqIds.includes(req) || logEqNoms.some(n => n.includes(req)));
+        });
+      }
+    }
+
+    // 12. Tri précis
+    const tri = filters.tri || 'pertinence';
+    if (tri === 'prix_asc') {
+      result.sort((a, b) => Number(a.prix_par_mois) - Number(b.prix_par_mois));
+    } else if (tri === 'prix_desc') {
+      result.sort((a, b) => Number(b.prix_par_mois) - Number(a.prix_par_mois));
+    } else if (tri === 'surface_asc') {
+      result.sort((a, b) => Number(a.surface) - Number(b.surface));
+    } else if (tri === 'surface_desc') {
+      result.sort((a, b) => Number(b.surface) - Number(a.surface));
+    } else if (tri === 'recent') {
+      result.sort((a, b) => Number(b.id) - Number(a.id));
+    } else if (tri === 'note') {
+      result.sort((a, b) => (Number(b.note_moyenne) || 0) - (Number(a.note_moyenne) || 0));
+    }
+
+    return result;
   }
 
   // RF-14 : Détail logement avec garantie de chargement immédiat
@@ -501,22 +605,51 @@ export class LogementService {
   getMesLogements(): Observable<Logement[]> {
     const headers = this.auth.getAuthHeaders();
     return this.http.get<Logement[]>(`${this.apiUrl}/admin/logements`, { headers }).pipe(
+      map(backendLogements => {
+        const list = Array.isArray(backendLogements) ? backendLogements : [];
+        const backendIds = new Set(list.map(l => l.id));
+        const user = this.auth.currentUser();
+        const adminId = user?.id;
+        const isSuperAdmin = user?.role === 'superadmin';
+
+        // Conserver les logements créés localement qui ne sont pas encore en base ou en cas de divergence
+        const localItems = this.catalogueLogements.filter(l => {
+          if (backendIds.has(l.id)) return false;
+          if (isSuperAdmin) return true;
+          return !adminId || l.admin_id === adminId || l.admin?.id === adminId;
+        });
+
+        return [...list, ...localItems];
+      }),
       catchError(() => {
         // Fallback : filtrer par admin_id de l'utilisateur connecté
         const user = this.auth.currentUser();
         const adminId = user?.id;
-        const mesLogements = adminId
-          ? this.catalogueLogements.filter(l => l.admin_id === adminId)
-          : this.catalogueLogements.slice(0, 3);
+        const isSuperAdmin = user?.role === 'superadmin';
+        const mesLogements = isSuperAdmin
+          ? this.catalogueLogements
+          : (adminId
+            ? this.catalogueLogements.filter(l => l.admin_id === adminId || l.admin?.id === adminId)
+            : this.catalogueLogements.slice(0, 3));
         return of(mesLogements);
       })
     );
   }
 
-  // Création d'un logement : ajout local immédiat + tentative API
+  // Création d'un logement : ajout local immédiat + synchronisation API robuste
   createLogement(data: any): Observable<Logement> {
     const headers = this.auth.getAuthHeaders();
     const user = this.auth.currentUser();
+
+    // Normalisation des enums pour le backend
+    if (data.mode_reservation === 'sur_demande') {
+      data.mode_reservation = 'sur_validation';
+    }
+    if (data.politique_annulation === 'moderee') {
+      data.politique_annulation = 'partielle';
+    } else if (data.politique_annulation === 'stricte') {
+      data.politique_annulation = 'non_remboursable';
+    }
 
     // Résolution précise des coordonnées géographiques au Sénégal
     if (!data.latitude || !data.longitude || data.latitude < 11 || data.latitude > 18) {
@@ -533,7 +666,14 @@ export class LogementService {
       ordre: i + 1
     }));
 
-    const equipementsNoms: string[] = data.equipements_liste || [];
+    let equipementsNoms: string[] = [];
+    if (Array.isArray(data.equipements_liste) && data.equipements_liste.length > 0) {
+      equipementsNoms = data.equipements_liste;
+    } else if (typeof data.equipements_texte === 'string' && data.equipements_texte.trim()) {
+      equipementsNoms = data.equipements_texte.split(',').map((s: string) => s.trim()).filter((s: string) => !!s);
+    } else if (typeof data.equipements === 'string' && data.equipements.trim()) {
+      equipementsNoms = data.equipements.split(',').map((s: string) => s.trim()).filter((s: string) => !!s);
+    }
     const equipementsObj = equipementsNoms.map((nom: string, i: number) => ({
       id: Date.now() + i + 100,
       nom,
@@ -541,9 +681,13 @@ export class LogementService {
       icone: 'bi-check-circle'
     }));
 
+    const statutParDefaut = data.statut || 'hors_ligne';
+    data.statut = statutParDefaut;
+
     const newLogement: Logement = {
       id: Date.now(),
       ...data,
+      statut: statutParDefaut,
       admin_id: user?.id || 2,
       admin: {
         id: user?.id || 2,
@@ -566,12 +710,37 @@ export class LogementService {
     this.saveCatalogToStorage();
 
     return this.http.post<Logement>(`${this.apiUrl}/admin/logements`, data, { headers }).pipe(
-      catchError(() => of(newLogement))
+      tap((created) => {
+        if (created && created.id) {
+          const idx = this.catalogueLogements.findIndex(l => l.id === newLogement.id);
+          const fullCreated = { ...newLogement, ...created };
+          if (idx !== -1) {
+            this.catalogueLogements[idx] = fullCreated;
+          } else {
+            this.catalogueLogements.unshift(fullCreated);
+          }
+          this.saveCatalogToStorage();
+        }
+      }),
+      catchError((err) => {
+        console.warn('API non joignable ou erreur création logement, conservation en local:', err);
+        return of(newLogement);
+      })
     );
   }
 
   updateLogement(id: number, data: any): Observable<Logement> {
     const headers = this.auth.getAuthHeaders();
+
+    // Normalisation des enums pour le backend
+    if (data.mode_reservation === 'sur_demande') {
+      data.mode_reservation = 'sur_validation';
+    }
+    if (data.politique_annulation === 'moderee') {
+      data.politique_annulation = 'partielle';
+    } else if (data.politique_annulation === 'stricte') {
+      data.politique_annulation = 'non_remboursable';
+    }
 
     // Résolution précise des coordonnées géographiques au Sénégal
     if (!data.latitude || !data.longitude || data.latitude < 11 || data.latitude > 18) {
@@ -587,7 +756,14 @@ export class LogementService {
       ordre: i + 1
     }));
 
-    const equipementsNoms: string[] = data.equipements_liste || [];
+    let equipementsNoms: string[] = [];
+    if (Array.isArray(data.equipements_liste) && data.equipements_liste.length > 0) {
+      equipementsNoms = data.equipements_liste;
+    } else if (typeof data.equipements_texte === 'string' && data.equipements_texte.trim()) {
+      equipementsNoms = data.equipements_texte.split(',').map((s: string) => s.trim()).filter((s: string) => !!s);
+    } else if (typeof data.equipements === 'string' && data.equipements.trim()) {
+      equipementsNoms = data.equipements.split(',').map((s: string) => s.trim()).filter((s: string) => !!s);
+    }
     const equipementsObj = equipementsNoms.map((nom: string, i: number) => ({
       id: Date.now() + i + 100,
       nom,
@@ -610,6 +786,15 @@ export class LogementService {
 
     const updated = this.catalogueLogements[idx];
     return this.http.put<Logement>(`${this.apiUrl}/admin/logements/${id}`, data, { headers }).pipe(
+      tap((updatedServer) => {
+        if (updatedServer) {
+          const i = this.catalogueLogements.findIndex(l => l.id === id);
+          if (i !== -1) {
+            this.catalogueLogements[i] = { ...this.catalogueLogements[i], ...updatedServer };
+            this.saveCatalogToStorage();
+          }
+        }
+      }),
       catchError(() => of(updated))
     );
   }
@@ -632,11 +817,17 @@ export class LogementService {
     // Mise à jour locale immédiate
     const log = this.catalogueLogements.find(l => l.id === id);
     if (log) {
-      log.statut = log.statut === 'publie' ? 'brouillon' : 'publie';
+      log.statut = log.statut === 'publie' ? 'hors_ligne' : 'publie';
       this.saveCatalogToStorage();
     }
 
     return this.http.patch(`${this.apiUrl}/admin/logements/${id}/toggle-statut`, {}, { headers }).pipe(
+      tap((res: any) => {
+        if (res?.logement?.statut && log) {
+          log.statut = res.logement.statut;
+          this.saveCatalogToStorage();
+        }
+      }),
       catchError(() => of({ id, statut: log?.statut, logement: log }))
     );
   }

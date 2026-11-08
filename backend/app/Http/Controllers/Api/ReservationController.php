@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ReservationConfirmeeMail;
+use App\Mail\ReservationRefuseeMail;
 use App\Models\Contrat;
 use App\Models\Disponibilite;
 use App\Models\Logement;
@@ -11,6 +13,8 @@ use App\Models\Notification;
 use App\Models\Reservation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ReservationController extends Controller
 {
@@ -152,10 +156,52 @@ class ReservationController extends Controller
     public function valider(Request $request, $id)
     {
         $reservation = Reservation::with(['logement', 'locataire'])->findOrFail($id);
+        $user = $request->user();
+
+        // 1. Contrôle d'autorisation : seul le gestionnaire du bien ou un superadmin peut valider
+        $isAdminLogement = $reservation->logement && (int) $reservation->logement->admin_id === (int) $user->id;
+        $isSuperAdmin = ($user->role === 'superadmin');
+
+        if (!$isAdminLogement && !$isSuperAdmin) {
+            return response()->json([
+                'message' => 'Action non autorisée. Seul le gestionnaire de ce logement ou un administrateur peut valider cette réservation.'
+            ], 403);
+        }
+
+        // 2. Vérification d'état : empêcher le double traitement
+        if ($reservation->statut !== 'en_attente') {
+            return response()->json([
+                'message' => "Cette réservation a déjà été traitée (statut actuel : {$reservation->statut})."
+            ], 422);
+        }
+
+        // 3. Vérification de la disponibilité du logement pour les dates demandées
+        $debut = Carbon::parse($reservation->date_debut);
+        $fin = Carbon::parse($reservation->date_fin);
+
+        $conflit = Reservation::where('logement_id', $reservation->logement_id)
+            ->where('id', '!=', $reservation->id)
+            ->whereIn('statut', ['confirmee', 'payee'])
+            ->where(function ($q) use ($debut, $fin) {
+                $q->whereBetween('date_debut', [$debut, $fin])
+                  ->orWhereBetween('date_fin', [$debut, $fin])
+                  ->orWhere(function ($sub) use ($debut, $fin) {
+                      $sub->where('date_debut', '<=', $debut)
+                          ->where('date_fin', '>=', $fin);
+                  });
+            })->exists();
+
+        if ($conflit) {
+            return response()->json([
+                'message' => 'Le logement n\'est plus disponible pour les dates demandées.'
+            ], 422);
+        }
+
+        // 4. Mise à jour du statut
         $reservation->statut = 'confirmee';
         $reservation->save();
 
-        // RF-24 : Création du contrat associé
+        // 5. RF-24 : Création du contrat associé
         Contrat::firstOrCreate(
             ['reservation_id' => $reservation->id],
             [
@@ -168,12 +214,12 @@ class ReservationController extends Controller
 
         $lienPaiement = "/logements/{$reservation->logement_id}/reserver?reservation_id={$reservation->id}&step=3";
 
-        // Message automatique dans la messagerie du compte locataire avec lien Phase 2 de paiement
+        // 6. Message interne de messagerie
         Message::create([
-            'expediteur_id' => $request->user()->id,
+            'expediteur_id' => $user->id,
             'destinataire_id' => $reservation->locataire_id,
             'reservation_id' => $reservation->id,
-            'contenu' => "Bonjour " . ($reservation->locataire->name ?? 'cher locataire') . ",\n\nJ'ai vérifié vos pièces justificatives et votre dossier locataire. J'ai le plaisir de valider votre réservation pour le logement « {$reservation->logement->titre} » !\n\nVous pouvez dès à présent procéder à la Phase 2 du règlement sécurisé sur la plateforme (Wave / Orange Money / Carte Bancaire) pour bloquer définitivement vos dates en cliquant sur ce lien : {$lienPaiement}\n\nFélicitations et bienvenue !",
+            'contenu' => "Bonjour " . ($reservation->locataire->prenom ?? $reservation->locataire->name ?? 'cher locataire') . ",\n\nJ'ai vérifié vos pièces justificatives et votre dossier locataire. J'ai le plaisir de valider votre réservation pour le logement « {$reservation->logement->titre} » !\n\nVous pouvez dès à présent procéder à la Phase 2 du règlement sécurisé sur la plateforme (Wave / Orange Money / Carte Bancaire) pour bloquer définitivement vos dates en cliquant sur ce lien : {$lienPaiement}\n\nFélicitations et bienvenue !",
             'lu' => false,
         ]);
 
@@ -184,27 +230,69 @@ class ReservationController extends Controller
             'message' => "Votre réservation pour \"{$reservation->logement->titre}\" a été validée par le gestionnaire. Lien de paiement sécurisé : {$lienPaiement}",
         ]);
 
+        // 7. Envoi automatique de l'e-mail de confirmation au locataire
+        $emailEnvoye = false;
+        if (!empty($reservation->locataire?->email)) {
+            try {
+                Mail::to($reservation->locataire->email)->send(new ReservationConfirmeeMail($reservation));
+                $emailEnvoye = true;
+                Log::info("Email de validation de réservation envoyé avec succès à {$reservation->locataire->email} (Réservation #{$reservation->id})");
+            } catch (\Throwable $e) {
+                Log::error("Échec de l'envoi de l'e-mail de validation (Réservation #{$reservation->id}): " . $e->getMessage(), [
+                    'reservation_id' => $reservation->id,
+                    'destinataire' => $reservation->locataire->email,
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        }
+
         return response()->json([
-            'message' => 'Réservation validée avec succès',
-            'reservation' => $reservation->load(['logement', 'contrat'])
+            'message' => 'Réservation validée avec succès.',
+            'email_envoye' => $emailEnvoye,
+            'reservation' => $reservation->load(['logement', 'contrat', 'locataire'])
         ]);
     }
 
-    // RF-43 : Refuser une demande avec motif (Admin)
+    // RF-43 : Refuser une demande avec motif facultatif (Admin)
     public function refuser(Request $request, $id)
     {
-        $request->validate(['motif' => 'required|string']);
+        $request->validate([
+            'motif' => 'nullable|string|max:1000'
+        ]);
+
         $reservation = Reservation::with(['logement', 'locataire'])->findOrFail($id);
+        $user = $request->user();
+
+        // 1. Contrôle d'autorisation
+        $isAdminLogement = $reservation->logement && (int) $reservation->logement->admin_id === (int) $user->id;
+        $isSuperAdmin = ($user->role === 'superadmin');
+
+        if (!$isAdminLogement && !$isSuperAdmin) {
+            return response()->json([
+                'message' => 'Action non autorisée. Seul le gestionnaire de ce logement ou un administrateur peut refuser cette réservation.'
+            ], 403);
+        }
+
+        // 2. Vérification d'état : empêcher le double traitement
+        if ($reservation->statut !== 'en_attente') {
+            return response()->json([
+                'message' => "Cette réservation a déjà été traitée (statut actuel : {$reservation->statut})."
+            ], 422);
+        }
+
+        // 3. Mise à jour du statut et du motif facultatif
+        $motif = $request->filled('motif') ? trim($request->motif) : null;
         $reservation->statut = 'refusee';
-        $reservation->motif_refus = $request->motif;
+        $reservation->motif_refus = $motif;
         $reservation->save();
 
-        // Message automatique explicatif dans la messagerie du locataire
+        // 4. Message automatique explicatif dans la messagerie interne
+        $precisionMotif = $motif ? "\n\n📌 Motif du refus : {$motif}" : "";
         Message::create([
-            'expediteur_id' => $request->user()->id,
+            'expediteur_id' => $user->id,
             'destinataire_id' => $reservation->locataire_id,
             'reservation_id' => $reservation->id,
-            'contenu' => "Bonjour " . ($reservation->locataire->name ?? 'cher locataire') . ",\n\nVotre demande de réservation pour le logement « {$reservation->logement->titre} » n'a malheureusement pas pu être retenue pour le motif suivant :\n\n📌 Motif du refus : {$request->motif}\n\nN'hésitez pas à consulter d'autres logements disponibles sur la plateforme ou à mettre à jour vos pièces justificatives.",
+            'contenu' => "Bonjour " . ($reservation->locataire->prenom ?? $reservation->locataire->name ?? 'cher locataire') . ",\n\nVotre demande de réservation pour le logement « {$reservation->logement->titre} » n'a malheureusement pas pu être retenue.{$precisionMotif}\n\nN'hésitez pas à consulter d'autres logements disponibles sur la plateforme.",
             'lu' => false,
         ]);
 
@@ -212,12 +300,29 @@ class ReservationController extends Controller
             'user_id' => $reservation->locataire_id,
             'canal' => 'email',
             'titre' => 'Demande de réservation refusée',
-            'message' => "Votre demande pour \"{$reservation->logement->titre}\" n'a pas pu être retenue. Motif : {$request->motif}",
+            'message' => "Votre demande pour \"{$reservation->logement->titre}\" n'a pas pu être retenue." . ($motif ? " Motif : {$motif}" : ""),
         ]);
 
+        // 5. Envoi automatique de l'e-mail de refus au locataire
+        $emailEnvoye = false;
+        if (!empty($reservation->locataire?->email)) {
+            try {
+                Mail::to($reservation->locataire->email)->send(new ReservationRefuseeMail($reservation, $motif));
+                $emailEnvoye = true;
+                Log::info("Email de refus de réservation envoyé avec succès à {$reservation->locataire->email} (Réservation #{$reservation->id})");
+            } catch (\Throwable $e) {
+                Log::error("Échec de l'envoi de l'e-mail de refus (Réservation #{$reservation->id}): " . $e->getMessage(), [
+                    'reservation_id' => $reservation->id,
+                    'destinataire' => $reservation->locataire->email,
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        }
+
         return response()->json([
-            'message' => 'Réservation refusée',
-            'reservation' => $reservation
+            'message' => 'Réservation refusée avec succès.',
+            'email_envoye' => $emailEnvoye,
+            'reservation' => $reservation->load(['logement', 'locataire'])
         ]);
     }
 

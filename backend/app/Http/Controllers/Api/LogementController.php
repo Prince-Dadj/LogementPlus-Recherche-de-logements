@@ -51,9 +51,12 @@ class LogementController extends Controller
             $query->where('prix_par_mois', '<=', (float) $request->prix_max);
         }
 
-        // Filtre par surface minimale
+        // Filtre par surface minimale et maximale
         if ($request->filled('surface_min')) {
             $query->where('surface', '>=', (float) $request->surface_min);
+        }
+        if ($request->filled('surface_max')) {
+            $query->where('surface', '<=', (float) $request->surface_max);
         }
 
         // Filtre par nombre de pièces
@@ -62,24 +65,44 @@ class LogementController extends Controller
         }
 
         // Filtre meublé ou non
-        if ($request->has('meuble') && $request->meuble !== null && $request->meuble !== '') {
+        if ($request->has('meuble') && $request->meuble !== null && $request->meuble !== '' && $request->meuble !== 'tous') {
             $query->where('meuble', filter_var($request->meuble, FILTER_VALIDATE_BOOLEAN));
+        }
+
+        // Filtre par disponibilité (masquer les logements occupés)
+        if ($request->get('disponibilite') === 'disponible') {
+            $query->where(function ($q) {
+                $q->whereDoesntHave('reservations', function ($sub) {
+                    $sub->whereIn('statut', ['confirmee', 'payee']);
+                });
+            });
+        }
+
+        // Filtre par mode de réservation (immédiate vs sur validation)
+        if ($request->filled('mode_reservation') && $request->mode_reservation !== 'tous') {
+            $query->where('mode_reservation', $request->mode_reservation);
         }
 
         // Filtre par équipements spécifiques (RF-11)
         if ($request->filled('equipements')) {
-            $equipementIds = is_array($request->equipements)
+            $equipementValues = is_array($request->equipements)
                 ? $request->equipements
                 : explode(',', $request->equipements);
 
-            foreach ($equipementIds as $eqId) {
-                $query->whereHas('equipements', function ($q) use ($eqId) {
-                    $q->where('equipements.id', $eqId);
+            foreach ($equipementValues as $eqVal) {
+                $trimmed = trim($eqVal);
+                if (empty($trimmed)) continue;
+                $query->whereHas('equipements', function ($q) use ($trimmed) {
+                    if (is_numeric($trimmed)) {
+                        $q->where('equipements.id', (int) $trimmed);
+                    } else {
+                        $q->where('equipements.nom', 'like', "%{$trimmed}%");
+                    }
                 });
             }
         }
 
-        // Tri (RF-12)
+        // Tri précis (RF-12)
         $tri = $request->get('tri', 'pertinence');
         switch ($tri) {
             case 'prix_asc':
@@ -88,8 +111,14 @@ class LogementController extends Controller
             case 'prix_desc':
                 $query->orderBy('prix_par_mois', 'desc');
                 break;
+            case 'surface_asc':
+                $query->orderBy('surface', 'asc');
+                break;
+            case 'surface_desc':
+                $query->orderBy('surface', 'desc');
+                break;
             case 'recent':
-                $query->orderBy('created_at', 'desc');
+                $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
                 break;
             default:
                 $query->orderBy('id', 'desc');
@@ -128,14 +157,46 @@ class LogementController extends Controller
         return response()->json(Equipement::all());
     }
 
+    // Helper : Traite et sauvegarde les photos base64 sur le disque public
+    private function processPhotoUrl(?string $photoUrl): ?string
+    {
+        if (!$photoUrl) {
+            return null;
+        }
+
+        if (str_starts_with($photoUrl, 'data:image')) {
+            if (preg_match('/^data:image\/(\w+);base64,/', $photoUrl, $type)) {
+                $data = substr($photoUrl, strpos($photoUrl, ',') + 1);
+                $type = strtolower($type[1]);
+                if (!in_array($type, ['jpg', 'jpeg', 'gif', 'png', 'webp'])) {
+                    $type = 'jpg';
+                }
+                $data = base64_decode($data);
+                if ($data !== false) {
+                    $filename = 'logements/' . uniqid('logement_', true) . '.' . $type;
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $data);
+                    return '/storage/' . $filename;
+                }
+            }
+        }
+
+        return $photoUrl;
+    }
+
     // RF-40 : Logements gérés par l'admin connecté
     public function mesLogements(Request $request)
     {
-        $adminId = $request->user()->id;
-        $logements = Logement::with(['photos', 'equipements', 'reservations'])
-            ->where('admin_id', $adminId)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $user = $request->user();
+        if ($user && $user->role === 'superadmin') {
+            $logements = Logement::with(['photos', 'equipements', 'reservations'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            $logements = Logement::with(['photos', 'equipements', 'reservations'])
+                ->where('admin_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
         return response()->json($logements);
     }
@@ -155,11 +216,12 @@ class LogementController extends Controller
             'prix_par_mois' => 'required|numeric|min:0',
             'caution' => 'nullable|numeric|min:0',
             'frais_service' => 'nullable|numeric|min:0',
-            'nb_pieces' => 'required|integer|min:1',
+            'nb_pieces' => 'nullable|integer|min:1',
             'surface' => 'required|numeric|min:1',
-            'meuble' => 'boolean',
-            'mode_reservation' => 'required|in:immediate,sur_validation',
-            'politique_annulation' => 'required|in:gratuite,partielle,non_remboursable',
+            'meuble' => 'nullable',
+            'mode_reservation' => 'nullable|string|in:immediate,sur_validation,sur_demande',
+            'politique_annulation' => 'nullable|string|in:gratuite,partielle,non_remboursable,moderee,stricte',
+            'statut' => 'nullable|string|in:publie,hors_ligne,brouillon',
             'reglement_interieur' => 'nullable|string',
             'points_interet' => 'nullable|string',
             'accessibilite' => 'nullable|string',
@@ -175,6 +237,33 @@ class LogementController extends Controller
             $validated['longitude'] ?? null
         );
 
+        $modeReservation = ($request->mode_reservation === 'immediate') ? 'immediate' : 'sur_validation';
+        $politique = $request->politique_annulation ?? 'gratuite';
+        if ($politique === 'moderee') $politique = 'partielle';
+        if ($politique === 'stricte') $politique = 'non_remboursable';
+        if (!in_array($politique, ['gratuite', 'partielle', 'non_remboursable'])) {
+            $politique = 'gratuite';
+        }
+
+        // Traitement robuste des photos (conversion base64 vers disque public)
+        $photosList = [];
+        if (!empty($request->photos) && is_array($request->photos)) {
+            foreach ($request->photos as $p) {
+                if (is_string($p) && !empty($p)) {
+                    $photosList[] = $this->processPhotoUrl($p);
+                }
+            }
+        }
+
+        $imagePrincipale = !empty($photosList[0])
+            ? $photosList[0]
+            : ($request->image_principale ? $this->processPhotoUrl($request->image_principale) : null);
+
+        $statut = $request->input('statut', 'hors_ligne');
+        if (!in_array($statut, ['publie', 'hors_ligne', 'brouillon'])) {
+            $statut = 'hors_ligne';
+        }
+
         $logement = Logement::create([
             'admin_id' => $request->user()->id,
             'titre' => $validated['titre'],
@@ -188,37 +277,47 @@ class LogementController extends Controller
             'prix_par_mois' => $validated['prix_par_mois'],
             'caution' => $validated['caution'] ?? $validated['prix_par_mois'],
             'frais_service' => $validated['frais_service'] ?? ($validated['prix_par_mois'] * 0.05),
-            'nb_pieces' => $validated['nb_pieces'],
+            'nb_pieces' => $validated['nb_pieces'] ?? 1,
             'surface' => $validated['surface'],
-            'meuble' => $validated['meuble'] ?? false,
-            'statut' => 'publie',
-            'mode_reservation' => $validated['mode_reservation'],
-            'politique_annulation' => $validated['politique_annulation'],
+            'meuble' => filter_var($request->meuble ?? false, FILTER_VALIDATE_BOOLEAN),
+            'statut' => $statut,
+            'mode_reservation' => $modeReservation,
+            'politique_annulation' => $politique,
             'reglement_interieur' => $validated['reglement_interieur'] ?? null,
             'points_interet' => $validated['points_interet'] ?? null,
             'accessibilite' => $validated['accessibilite'] ?? null,
-            'image_principale' => $validated['image_principale'] ?? ($validated['photos'][0] ?? null),
+            'image_principale' => $imagePrincipale,
         ]);
 
         $equipementIds = $validated['equipement_ids'] ?? [];
-        if ($request->filled('equipements_liste') && is_array($request->equipements_liste)) {
-            foreach ($request->equipements_liste as $eqNom) {
-                if (!empty(trim($eqNom))) {
-                    $eq = Equipement::firstOrCreate(
-                        ['nom' => trim($eqNom)],
-                        ['icone' => 'bi-check-circle', 'categorie' => 'confort']
-                    );
-                    $equipementIds[] = $eq->id;
-                }
+
+        // Traitement des équipements (texte séparé par des virgules ou tableau)
+        $nomsEquipements = [];
+        if ($request->filled('equipements_texte') && is_string($request->equipements_texte)) {
+            $nomsEquipements = explode(',', $request->equipements_texte);
+        } elseif ($request->filled('equipements') && is_string($request->equipements)) {
+            $nomsEquipements = explode(',', $request->equipements);
+        } elseif ($request->filled('equipements_liste') && is_array($request->equipements_liste)) {
+            $nomsEquipements = $request->equipements_liste;
+        }
+
+        foreach ($nomsEquipements as $eqNom) {
+            $nomNettoye = trim($eqNom);
+            if (!empty($nomNettoye)) {
+                $eq = Equipement::firstOrCreate(
+                    ['nom' => $nomNettoye],
+                    ['icone' => 'bi-check-circle', 'categorie' => 'confort']
+                );
+                $equipementIds[] = $eq->id;
             }
         }
         if (!empty($equipementIds)) {
             $logement->equipements()->sync(array_unique($equipementIds));
         }
 
-        if (!empty($validated['photos'])) {
+        if (!empty($photosList)) {
             $order = 1;
-            foreach ($validated['photos'] as $photoUrl) {
+            foreach ($photosList as $photoUrl) {
                 Photo::create([
                     'logement_id' => $logement->id,
                     'url' => $photoUrl,
@@ -251,11 +350,12 @@ class LogementController extends Controller
             'prix_par_mois' => 'sometimes|required|numeric|min:0',
             'caution' => 'nullable|numeric|min:0',
             'frais_service' => 'nullable|numeric|min:0',
-            'nb_pieces' => 'sometimes|required|integer|min:1',
+            'nb_pieces' => 'nullable|integer|min:1',
             'surface' => 'sometimes|required|numeric|min:1',
-            'meuble' => 'boolean',
-            'mode_reservation' => 'sometimes|required|in:immediate,sur_validation',
-            'politique_annulation' => 'sometimes|required|in:gratuite,partielle,non_remboursable',
+            'meuble' => 'nullable',
+            'mode_reservation' => 'nullable|string|in:immediate,sur_validation,sur_demande',
+            'politique_annulation' => 'nullable|string|in:gratuite,partielle,non_remboursable,moderee,stricte',
+            'statut' => 'nullable|string|in:publie,hors_ligne,brouillon',
             'reglement_interieur' => 'nullable|string',
             'points_interet' => 'nullable|string',
             'accessibilite' => 'nullable|string',
@@ -275,36 +375,77 @@ class LogementController extends Controller
             $validated['longitude'] = $lng;
         }
 
-        $logement->update($validated);
+        if ($request->has('mode_reservation')) {
+            $validated['mode_reservation'] = ($request->mode_reservation === 'immediate') ? 'immediate' : 'sur_validation';
+        }
 
-        $equipementIds = $request->input('equipement_ids', []);
-        if ($request->filled('equipements_liste') && is_array($request->equipements_liste)) {
-            foreach ($request->equipements_liste as $eqNom) {
-                if (!empty(trim($eqNom))) {
-                    $eq = Equipement::firstOrCreate(
-                        ['nom' => trim($eqNom)],
-                        ['icone' => 'bi-check-circle', 'categorie' => 'confort']
-                    );
-                    $equipementIds[] = $eq->id;
+        if ($request->has('politique_annulation')) {
+            $pol = $request->politique_annulation;
+            if ($pol === 'moderee') $pol = 'partielle';
+            if ($pol === 'stricte') $pol = 'non_remboursable';
+            $validated['politique_annulation'] = in_array($pol, ['gratuite', 'partielle', 'non_remboursable']) ? $pol : 'gratuite';
+        }
+
+        if ($request->has('meuble')) {
+            $validated['meuble'] = filter_var($request->meuble, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        // Traitement robuste des photos si fournies
+        $photosList = [];
+        if ($request->filled('photos') && is_array($request->photos)) {
+            foreach ($request->photos as $p) {
+                if (is_string($p) && !empty($p)) {
+                    $photosList[] = $this->processPhotoUrl($p);
                 }
             }
         }
-        if ($request->has('equipement_ids') || $request->filled('equipements_liste')) {
+
+        if (!empty($photosList)) {
+            $validated['image_principale'] = $photosList[0];
+        } elseif ($request->filled('image_principale')) {
+            $validated['image_principale'] = $this->processPhotoUrl($request->image_principale);
+        }
+
+        $logement->update($validated);
+
+        $equipementIds = $request->input('equipement_ids', []);
+
+        // Traitement des équipements (texte séparé par des virgules ou tableau)
+        $nomsEquipements = [];
+        if ($request->filled('equipements_texte') && is_string($request->equipements_texte)) {
+            $nomsEquipements = explode(',', $request->equipements_texte);
+        } elseif ($request->filled('equipements') && is_string($request->equipements)) {
+            $nomsEquipements = explode(',', $request->equipements);
+        } elseif ($request->filled('equipements_liste') && is_array($request->equipements_liste)) {
+            $nomsEquipements = $request->equipements_liste;
+        }
+
+        foreach ($nomsEquipements as $eqNom) {
+            $nomNettoye = trim($eqNom);
+            if (!empty($nomNettoye)) {
+                $eq = Equipement::firstOrCreate(
+                    ['nom' => $nomNettoye],
+                    ['icone' => 'bi-check-circle', 'categorie' => 'confort']
+                );
+                $equipementIds[] = $eq->id;
+            }
+        }
+        if ($request->has('equipement_ids') || $request->filled('equipements_liste') || $request->filled('equipements_texte') || $request->filled('equipements')) {
             $logement->equipements()->sync(array_unique($equipementIds));
         }
 
-        if ($request->filled('photos') && is_array($request->photos) && count($request->photos) > 0) {
+        if (!empty($photosList)) {
             $logement->photos()->delete();
             $order = 1;
-            foreach ($request->photos as $photoUrl) {
+            foreach ($photosList as $photoUrl) {
                 Photo::create([
                     'logement_id' => $logement->id,
                     'url' => $photoUrl,
                     'ordre' => $order++,
                 ]);
             }
-            if (empty($validated['image_principale'])) {
-                $logement->image_principale = $request->photos[0];
+            if (empty($validated['image_principale']) && !empty($photosList[0])) {
+                $logement->image_principale = $photosList[0];
                 $logement->save();
             }
         }

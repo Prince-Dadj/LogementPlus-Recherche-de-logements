@@ -234,13 +234,18 @@ Chart.register(...registerables);
                               <div class="btn-group btn-group-sm">
                                 <!-- Voir dossier locataire -->
                                 <button class="btn btn-outline-primary" (click)="ouvrirDossier(r)"><i class="bi bi-folder2-open me-1"></i>Dossier</button>
-                                <!-- Valider (CDC RF-43) -->
-                                <button class="btn btn-success" (click)="valider(r.id)">
-                                  <i class="bi bi-check-lg"></i> Accepter
+                                <!-- Valider -->
+                                <button class="btn btn-success" [disabled]="traitementEnCoursId === r.id" (click)="valider(r.id)" title="Valider la réservation">
+                                  @if (traitementEnCoursId === r.id) {
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                  } @else {
+                                    <i class="bi bi-check-lg me-1"></i>
+                                  }
+                                  Valider
                                 </button>
-                                <!-- Refuser avec motif (CDC RF-43) -->
-                                <button class="btn btn-outline-danger" (click)="ouvrirRefusModal(r)">
-                                  <i class="bi bi-x-lg"></i> Refuser
+                                <!-- Refuser -->
+                                <button class="btn btn-outline-danger" [disabled]="traitementEnCoursId === r.id" (click)="ouvrirRefusModal(r)" title="Refuser la réservation">
+                                  <i class="bi bi-x-lg me-1"></i> Refuser
                                 </button>
                               </div>
                             } @else {
@@ -285,7 +290,7 @@ Chart.register(...registerables);
                   <div class="d-flex align-items-center justify-content-between mb-3">
                     <h4 class="h6 fw-bold mb-0 text-primary">
                       <i class="bi {{ modeEditionLogement ? 'bi-pencil-square' : 'bi-plus-circle' }} me-1"></i>
-                      {{ modeEditionLogement ? 'Modifier : ' + newLogement.titre : 'Nouveau logement à publier' }}
+                      {{ modeEditionLogement ? 'Modifier : ' + newLogement.titre : 'Nouveau logement (enregistré en mode Hors ligne)' }}
                     </h4>
                     <button class="btn-close" (click)="fermerModalLogement()"></button>
                   </div>
@@ -310,29 +315,40 @@ Chart.register(...registerables);
                         </select>
                       </div>
 
-                      <!-- Ville -->
+                      <!-- Ville (Saisie libre - Input) -->
                       <div class="col-md-4">
                         <label class="form-label small fw-semibold">Ville <span class="text-danger">*</span></label>
-                        <select class="form-select form-select-sm" [(ngModel)]="newLogement.ville" name="ville" (change)="onVilleChange()">
+                        <input type="text" 
+                               list="villesList" 
+                               class="form-control form-control-sm" 
+                               [(ngModel)]="newLogement.ville" 
+                               name="ville" 
+                               placeholder="Ex: Dakar, Saint-Louis, Abidjan..." 
+                               (input)="onVilleInput()" 
+                               required>
+                        <datalist id="villesList">
                           @for (v of villesDisponibles; track v) {
-                            <option [value]="v">{{ v }}</option>
+                            <option [value]="v"></option>
                           }
-                        </select>
+                        </datalist>
                       </div>
 
-                      <!-- Quartier -->
+                      <!-- Quartier (Saisie libre - Input) -->
                       <div class="col-md-4">
                         <label class="form-label small fw-semibold">Quartier <span class="text-danger">*</span></label>
-                        @if (quartiersDisponibles.length > 0) {
-                          <select class="form-select form-select-sm" [(ngModel)]="newLogement.quartier" name="quartier" (change)="onAddressChange()">
-                            <option value="">-- Choisir un quartier --</option>
-                            @for (q of quartiersDisponibles; track q) {
-                              <option [value]="q">{{ q }}</option>
-                            }
-                          </select>
-                        } @else {
-                          <input type="text" class="form-control form-control-sm" [(ngModel)]="newLogement.quartier" name="quartier" placeholder="Ex: Almadies, Fann..." (input)="onAddressChange()">
-                        }
+                        <input type="text" 
+                               list="quartiersList" 
+                               class="form-control form-control-sm" 
+                               [(ngModel)]="newLogement.quartier" 
+                               name="quartier" 
+                               placeholder="Ex: Almadies, Fann, Sor, Cocody..." 
+                               (input)="onAddressChange()" 
+                               required>
+                        <datalist id="quartiersList">
+                          @for (q of quartiersDisponibles; track q) {
+                            <option [value]="q"></option>
+                          }
+                        </datalist>
                       </div>
 
                       <!-- Adresse / Rue -->
@@ -386,15 +402,15 @@ Chart.register(...registerables);
                         <label class="form-label small fw-semibold">Mode de réservation</label>
                         <select class="form-select form-select-sm" [(ngModel)]="newLogement.mode_reservation" name="mode_reservation">
                           <option value="immediate">Réservation immédiate</option>
-                          <option value="sur_demande">Sur demande (24h)</option>
+                          <option value="sur_validation">Sur demande (24h)</option>
                         </select>
                       </div>
                       <div class="col-md-4">
                         <label class="form-label small fw-semibold">Politique d'annulation</label>
                         <select class="form-select form-select-sm" [(ngModel)]="newLogement.politique_annulation" name="politique_annulation">
                           <option value="gratuite">Gratuite (7 jours)</option>
-                          <option value="moderee">Modérée (3 jours)</option>
-                          <option value="stricte">Stricte (non remboursable)</option>
+                          <option value="partielle">Modérée (3 jours)</option>
+                          <option value="non_remboursable">Stricte (non remboursable)</option>
                         </select>
                       </div>
 
@@ -406,6 +422,22 @@ Chart.register(...registerables);
                       <div class="col-md-6">
                         <label class="form-label small fw-semibold">Accessibilité</label>
                         <input type="text" class="form-control form-control-sm" [(ngModel)]="newLogement.accessibilite" name="accessibilite" placeholder="Ex: Bus ligne 5, taxi à 200m...">
+                      </div>
+
+                      <!-- Équipements (séparés par des virgules) -->
+                      <div class="col-12">
+                        <label class="form-label small fw-semibold">
+                          <i class="bi bi-tools text-primary me-1"></i>Équipements
+                          <span class="text-muted fw-normal">(séparés par des virgules)</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control form-control-sm" 
+                               [(ngModel)]="newLogement.equipements_texte" 
+                               name="equipements_texte" 
+                               placeholder="Ex: Climatisation, Wifi, Piscine, Parking privé, Gardiennage 24/7, Ascenseur, Machine à laver, Balcon...">
+                        <small class="text-muted d-block mt-1">
+                          <i class="bi bi-info-circle me-1"></i>Saisissez les équipements du logement séparés par des virgules (ex : <code>Wifi, Climatisation, Piscine, Parking</code>).
+                        </small>
                       </div>
 
                       <!-- Description -->
@@ -463,8 +495,8 @@ Chart.register(...registerables);
                           <i class="bi bi-x me-1"></i>Annuler
                         </button>
                         <button type="submit" class="btn btn-primary btn-sm px-4 fw-semibold">
-                          <i class="bi {{ modeEditionLogement ? 'bi-check-lg' : 'bi-cloud-upload' }} me-1"></i>
-                          {{ modeEditionLogement ? 'Enregistrer les modifications' : 'Publier le logement' }}
+                          <i class="bi {{ modeEditionLogement ? 'bi-check-lg' : 'bi-save2' }} me-1"></i>
+                          {{ modeEditionLogement ? 'Enregistrer les modifications' : 'Enregistrer le logement (Hors ligne)' }}
                         </button>
                       </div>
 
@@ -508,15 +540,24 @@ Chart.register(...registerables);
                           @if (logement.est_occupe) {
                             <span class="badge bg-danger me-1"><i class="bi bi-lock-fill me-1"></i>Occupé</span>
                           }
-                          <span class="badge" [ngClass]="logement.statut === 'publie' ? 'bg-success' : 'bg-secondary'">
-                            {{ logement.statut }}
-                          </span>
+                          @if (logement.statut === 'publie') {
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                              <i class="bi bi-check-circle-fill me-1"></i>En ligne
+                            </span>
+                          } @else {
+                            <span class="badge bg-secondary-subtle text-dark border border-secondary-subtle px-2 py-1">
+                              <i class="bi bi-eye-slash-fill text-muted me-1"></i>Hors ligne
+                            </span>
+                          }
                         </td>
                         <td class="text-end">
                           <div class="d-flex gap-1 justify-content-end flex-wrap">
-                            <button class="btn btn-outline-secondary btn-sm rounded-2" (click)="toggleStatut(logement)" title="{{ logement.statut === 'publie' ? 'Mettre hors ligne' : 'Publier' }}">
-                              <i class="bi" [class.bi-eye-slash]="logement.statut === 'publie'" [class.bi-eye]="logement.statut !== 'publie'"></i>
-                              <!-- <span class="d-none d-lg-inline ms-1">{{ logement.statut === 'publie' ? 'Hors ligne' : 'Publier' }}</span> -->
+                            <button class="btn btn-sm rounded-2" 
+                                    [ngClass]="logement.statut === 'publie' ? 'btn-outline-warning' : 'btn-outline-success'" 
+                                    (click)="toggleStatut(logement)" 
+                                    title="{{ logement.statut === 'publie' ? 'Désactiver et mettre hors ligne' : 'Publier et mettre en ligne' }}">
+                              <i class="bi" [class.bi-eye-slash]="logement.statut === 'publie'" [class.bi-cloud-arrow-up]="logement.statut !== 'publie'"></i>
+                              <!-- <span class="d-none d-xl-inline ms-1">{{ logement.statut === 'publie' ? 'Désactiver' : 'Mettre en ligne' }}</span> -->
                             </button>
                             <button class="btn btn-outline-primary btn-sm rounded-2" (click)="editerLogement(logement)" title="Modifier">
                               <i class="bi bi-pencil-square"></i>
@@ -527,6 +568,16 @@ Chart.register(...registerables);
                               <span class="d-none d-lg-inline ms-1"></span>
                             </button>
                           </div>
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                          <i class="bi bi-house-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                          <p class="mb-2 fw-semibold">Aucun logement trouvé dans votre catalogue.</p>
+                          <button class="btn btn-sm btn-primary rounded-2" (click)="ouvrirModalAjout()">
+                            <i class="bi bi-plus-lg me-1"></i> Ajouter votre premier logement
+                          </button>
                         </td>
                       </tr>
                     }
@@ -1298,11 +1349,16 @@ Chart.register(...registerables);
             </div>
             <div class="modal-footer border-0 px-4 pb-4 gap-2">
               <button class="btn btn-outline-secondary" (click)="fermerDossierModal()">Fermer</button>
-              <button class="btn btn-danger" (click)="ouvrirRefusModal(selectedReservation!)">
+              <button class="btn btn-danger" [disabled]="traitementEnCoursId === selectedReservation!.id" (click)="ouvrirRefusModal(selectedReservation!)">
                 <i class="bi bi-x-circle me-1"></i> Refuser
               </button>
-              <button class="btn btn-success" (click)="valider(selectedReservation!.id)">
-                <i class="bi bi-check-circle me-1"></i> Valider la réservation
+              <button class="btn btn-success" [disabled]="traitementEnCoursId === selectedReservation!.id" (click)="valider(selectedReservation!.id)">
+                @if (traitementEnCoursId === selectedReservation!.id) {
+                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                } @else {
+                  <i class="bi bi-check-circle me-1"></i>
+                }
+                Valider la réservation
               </button>
             </div>
           </div>
@@ -1311,7 +1367,7 @@ Chart.register(...registerables);
     }
 
     <!-- ============================================================
-         MODAL REFUS AVEC MOTIF
+         MODAL REFUS AVEC MOTIF (FACULTATIF)
          ============================================================ -->
     @if (showRefusModal && selectedReservation) {
       <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.6);" (click)="fermerRefusModal()">
@@ -1322,7 +1378,7 @@ Chart.register(...registerables);
               <button class="btn-close" (click)="fermerRefusModal()"></button>
             </div>
             <div class="modal-body px-4">
-              <p class="text-muted small mb-3">Sélectionnez ou saisissez un motif de refus. Le locataire sera automatiquement notifié dans sa messagerie.</p>
+              <p class="text-muted small mb-3">Sélectionnez un motif fréquent ou saisissez une explication (facultatif). Un e-mail d'information sera transmis automatiquement au locataire.</p>
 
               <!-- Motifs prédéfinis -->
               <div class="mb-3">
@@ -1339,16 +1395,21 @@ Chart.register(...registerables);
                 </div>
               </div>
 
-              <!-- Motif personnalisé -->
+              <!-- Motif personnalisé facultatif -->
               <div class="mb-3">
-                <label class="form-label small fw-semibold">Motif détaillé (obligatoire)</label>
-                <textarea class="form-control" rows="3" [(ngModel)]="refusMotif" placeholder="Ex: Logement attribué à un locataire prioritaire avec dossier complet..."></textarea>
+                <label class="form-label small fw-semibold">Motif détaillé <span class="text-muted fw-normal">(facultatif)</span></label>
+                <textarea class="form-control" rows="3" [(ngModel)]="refusMotif" placeholder="Optionnel : saisissez un motif ou laissez vide..."></textarea>
               </div>
             </div>
             <div class="modal-footer border-0 px-4 pb-4 gap-2">
-              <button class="btn btn-outline-secondary" (click)="fermerRefusModal()">Annuler</button>
-              <button class="btn btn-danger" (click)="confirmerRefus()" [disabled]="!refusMotif.trim()">
-                <i class="bi bi-x-circle me-1"></i> Confirmer le refus
+              <button class="btn btn-outline-secondary" [disabled]="traitementEnCoursId === selectedReservation.id" (click)="fermerRefusModal()">Annuler</button>
+              <button class="btn btn-danger" [disabled]="traitementEnCoursId === selectedReservation.id" (click)="confirmerRefus()">
+                @if (traitementEnCoursId === selectedReservation.id) {
+                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                } @else {
+                  <i class="bi bi-x-circle me-1"></i>
+                }
+                Confirmer le refus
               </button>
             </div>
           </div>
@@ -1503,6 +1564,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
   villesDisponibles = ['Saint-Louis', 'Dakar', 'Saly Portudal', 'Thiès', 'Mbour', 'Ziguinchor'];
   showDossierModal = false;
   showRefusModal = false;
+  traitementEnCoursId: number | null = null;
   selectedReservation: Reservation | null = null;
   refusMotif = '';
   refusMotifPredifinis = [
@@ -1599,12 +1661,14 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
     surface: 75,
     nb_pieces: 3,
     meuble: true,
+    statut: 'hors_ligne',
     mode_reservation: 'immediate',
     politique_annulation: 'gratuite',
     latitude: 14.7167,
     longitude: -17.4677,
     points_interet: '',
     accessibilite: '',
+    equipements_texte: '',
     photos: []
   };
 
@@ -1721,23 +1785,32 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   loadStats(): void {
-    this.dashboardService.getAdminStats(this.selectedAnnee).subscribe(s => {
-      this.stats = s;
-      if (s.annee) this.selectedAnnee = s.annee;
-      if (s.annees_disponibles && s.annees_disponibles.length > 0) {
-        this.anneesDisponibles = s.annees_disponibles;
-      }
-      this.cdr.markForCheck();
-      this.cdr.detectChanges();
-      if (this.activeTab === 'apercu') {
-        setTimeout(() => this.renderCharts(), 150);
+    this.dashboardService.getAdminStats(this.selectedAnnee).subscribe({
+      next: (s) => {
+        this.stats = s;
+        if (s.annee) this.selectedAnnee = s.annee;
+        if (s.annees_disponibles && s.annees_disponibles.length > 0) {
+          this.anneesDisponibles = s.annees_disponibles;
+        }
+        this.recalculerStatsLocales();
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+        if (this.activeTab === 'apercu') {
+          setTimeout(() => this.renderCharts(), 150);
+        }
+      },
+      error: () => {
+        this.recalculerStatsLocales();
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+        if (this.activeTab === 'apercu') {
+          setTimeout(() => this.renderCharts(), 150);
+        }
       }
     });
   }
 
   loadAll(): void {
-    this.loadStats();
-
     this.reservationService.getReservationsGestionnaire().subscribe(r => {
       this.reservations = r;
       this.cdr.markForCheck();
@@ -1746,9 +1819,56 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
 
     this.logementService.getMesLogements().subscribe(l => {
       this.logements = l;
+      this.recalculerStatsLocales();
+      this.loadStats();
       this.cdr.markForCheck();
       this.cdr.detectChanges();
     });
+  }
+
+  // Recalcul instantané des statistiques du gestionnaire (nombre de biens, répartition par type)
+  recalculerStatsLocales(): void {
+    const s: AdminStats = this.stats || {
+      annee: this.selectedAnnee || new Date().getFullYear(),
+      annees_disponibles: this.anneesDisponibles,
+      nb_logements: 0,
+      total_reservations: 0,
+      reservations_en_attente: 0,
+      reservations_confirmees: 0,
+      revenus_percus: 0,
+      taux_occupation: 0,
+      repartition_types: [],
+      evolution_mensuelle: []
+    };
+    this.stats = s;
+
+    // Nombre réel de logements gérés
+    s.nb_logements = this.logements.length;
+
+    // Répartition dynamique par type de bien (Appartement, Studio, Maison, Chambre)
+    const typeTotals: { [key: string]: number } = {};
+    for (const l of this.logements) {
+      const t = (l.type || 'appartement').toLowerCase();
+      typeTotals[t] = (typeTotals[t] || 0) + 1;
+    }
+
+    s.repartition_types = Object.keys(typeTotals).map(k => ({
+      type: k,
+      total: typeTotals[k]
+    }));
+
+    // Taux d'occupation estimé
+    const occupes = this.logements.filter(l => l.est_occupe || l.statut_occupation === 'occupe').length;
+    if (this.logements.length > 0) {
+      s.taux_occupation = Math.round((occupes / this.logements.length) * 100);
+    }
+
+    // Mise à jour réactive du doughnut chart sans détruire la vue
+    if (this.typeChartInstance && s.repartition_types.length > 0) {
+      this.typeChartInstance.data.labels = s.repartition_types.map(t => t.type.toUpperCase());
+      this.typeChartInstance.data.datasets[0].data = s.repartition_types.map(t => t.total);
+      this.typeChartInstance.update();
+    }
   }
 
   renderCharts(): void {
@@ -1827,29 +1947,51 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   valider(id: number | string): void {
-    const res = this.reservations.find(r => String(r.id) === String(id));
+    const resId = Number(id);
+    const res = this.reservations.find(r => r.id === resId);
     if (res) {
       this.selectedReservation = res;
     }
 
     this.modalAlert.confirm(
-      'Confirmer la validation de cette réservation ? Un message automatique avec le lien de paiement Phase 2 (Étape 3) sera immédiatement transmis au locataire.',
+      'Confirmer la validation de cette réservation ? Un e-mail officiel de confirmation sera immédiatement envoyé au locataire avec le récapitulatif de son dossier.',
       'Validation de Réservation',
       'Valider et Notifier',
       'Annuler'
     ).then((confirmed) => {
       if (!confirmed) return;
 
-      this.reservationService.validerReservation(Number(id)).subscribe({
-        next: () => {
+      this.traitementEnCoursId = resId;
+      this.cdr.markForCheck();
+
+      this.reservationService.validerReservation(resId).subscribe({
+        next: (resp) => {
+          this.traitementEnCoursId = null;
+
+          // Mise à jour immédiate sans rechargement complet
+          const item = this.reservations.find(r => r.id === resId);
+          if (item) {
+            item.statut = 'confirmee';
+            if (resp?.reservation) {
+              Object.assign(item, resp.reservation);
+            }
+          }
+          if (this.selectedReservation && this.selectedReservation.id === resId) {
+            this.selectedReservation.statut = 'confirmee';
+          }
+
           this.showDossierModal = false;
           this.selectedReservation = null;
-          this.modalAlert.success('Réservation validée avec succès ! Le locataire a été notifié dans sa messagerie avec le lien vers la phase de paiement.', 'Réservation Validée');
-          this.loadAll();
+          this.modalAlert.success('Réservation validée avec succès ! Un e-mail de confirmation officiel a été envoyé au locataire.', 'Réservation Validée');
+          this.loadStats();
           this.cdr.markForCheck();
           this.cdr.detectChanges();
         },
-        error: (err) => this.modalAlert.error(err.error?.message || 'Erreur lors de la validation', 'Erreur')
+        error: (err) => {
+          this.traitementEnCoursId = null;
+          this.modalAlert.error(err.error?.message || 'Erreur lors de la validation de la réservation', 'Erreur');
+          this.cdr.markForCheck();
+        }
       });
     });
   }
@@ -1869,6 +2011,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   fermerRefusModal(): void {
+    if (this.traitementEnCoursId) return;
     this.showRefusModal = false;
     this.refusMotif = '';
   }
@@ -1878,31 +2021,74 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   confirmerRefus(): void {
-    if (!this.selectedReservation || !this.refusMotif.trim()) {
-      this.modalAlert.warning('Veuillez indiquer ou sélectionner le motif du refus.', 'Motif Requis');
+    if (!this.selectedReservation) {
       return;
     }
 
-    this.reservationService.refuserReservation(this.selectedReservation.id, this.refusMotif).subscribe({
-      next: () => {
-        this.showRefusModal = false;
-        this.showDossierModal = false;
-        this.selectedReservation = null;
-        this.refusMotif = '';
-        this.modalAlert.warning('La réservation a été refusée. Le locataire a été notifié avec le motif de rejet dans sa messagerie.', 'Réservation Rejetée');
-        this.loadAll();
-        this.cdr.markForCheck();
-        this.cdr.detectChanges();
-      },
-      error: (err) => this.modalAlert.error(err.error?.message || 'Erreur lors du refus', 'Erreur')
+    const resId = this.selectedReservation.id;
+    const motifSaisi = this.refusMotif ? this.refusMotif.trim() : '';
+
+    const messageConfirmation = motifSaisi
+      ? `Confirmer le refus de cette réservation avec le motif suivant ?\n\n« ${motifSaisi} »\n\nUn e-mail de notification sera automatiquement envoyé au locataire.`
+      : `Confirmer le refus de cette réservation ? Un e-mail de notification sera automatiquement envoyé au locataire.`;
+
+    this.modalAlert.confirm(
+      messageConfirmation,
+      'Confirmation du refus',
+      'Confirmer le refus',
+      'Annuler'
+    ).then((confirmed) => {
+      if (!confirmed) return;
+
+      this.traitementEnCoursId = resId;
+      this.cdr.markForCheck();
+
+      this.reservationService.refuserReservation(resId, motifSaisi).subscribe({
+        next: (resp) => {
+          this.traitementEnCoursId = null;
+
+          // Mise à jour immédiate sans rechargement complet
+          const item = this.reservations.find(r => r.id === resId);
+          if (item) {
+            item.statut = 'refusee';
+            item.motif_refus = motifSaisi || undefined;
+            if (resp?.reservation) {
+              Object.assign(item, resp.reservation);
+            }
+          }
+          if (this.selectedReservation && this.selectedReservation.id === resId) {
+            this.selectedReservation.statut = 'refusee';
+            this.selectedReservation.motif_refus = motifSaisi || undefined;
+          }
+
+          this.showRefusModal = false;
+          this.showDossierModal = false;
+          this.selectedReservation = null;
+          this.refusMotif = '';
+          this.modalAlert.info('La réservation a été refusée. Un e-mail d\'information a été automatiquement envoyé au locataire.', 'Réservation Refusée');
+          this.loadStats();
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.traitementEnCoursId = null;
+          this.modalAlert.error(err.error?.message || 'Erreur lors du refus de la réservation', 'Erreur');
+          this.cdr.markForCheck();
+        }
+      });
     });
   }
 
   toggleStatut(logement: Logement): void {
     this.logementService.toggleStatut(logement.id).subscribe({
       next: (res) => {
-        logement.statut = res?.logement?.statut || res?.statut || (logement.statut === 'publie' ? 'brouillon' : 'publie');
-        this.modalAlert.info(`Statut du logement mis à jour : ${logement.statut === 'publie' ? 'Publié en ligne' : 'Brouillon privé'}.`, 'Statut Modifié');
+        logement.statut = res?.logement?.statut || res?.statut || (logement.statut === 'publie' ? 'hors_ligne' : 'publie');
+        const estPublie = logement.statut === 'publie';
+        this.modalAlert.info(
+          `Statut mis à jour : le logement est désormais ${estPublie ? 'En ligne' : 'Hors ligne'}.`,
+          'Statut Modifié'
+        );
+        this.recalculerStatsLocales();
         this.loadStats();
         this.cdr.markForCheck();
         this.cdr.detectChanges();
@@ -1927,12 +2113,14 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
       surface: 75,
       nb_pieces: 3,
       meuble: true,
+      statut: 'hors_ligne',
       mode_reservation: 'immediate',
       politique_annulation: 'gratuite',
       latitude: 14.7167,
       longitude: -17.4677,
       points_interet: '',
       accessibilite: '',
+      equipements_texte: '',
       photos: []
     };
     this.uploadedPhotosPreviews = [];
@@ -1951,6 +2139,18 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   editerLogement(logement: any): void {
+    let equipementsStr = '';
+    if (typeof logement.equipements_texte === 'string' && logement.equipements_texte) {
+      equipementsStr = logement.equipements_texte;
+    } else if (Array.isArray(logement.equipements)) {
+      equipementsStr = logement.equipements
+        .map((e: any) => e?.nom || e?.name || e)
+        .filter((x: any) => !!x)
+        .join(', ');
+    } else if (typeof logement.equipements === 'string') {
+      equipementsStr = logement.equipements;
+    }
+
     this.newLogement = {
       titre: logement.titre || '',
       description: logement.description || '',
@@ -1962,12 +2162,14 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
       surface: logement.surface || 75,
       nb_pieces: logement.nb_pieces || 3,
       meuble: logement.meuble !== undefined ? logement.meuble : true,
+      statut: logement.statut || 'hors_ligne',
       mode_reservation: logement.mode_reservation || 'immediate',
       politique_annulation: logement.politique_annulation || 'gratuite',
       latitude: logement.latitude || 14.7167,
       longitude: logement.longitude || -17.4677,
       points_interet: logement.points_interet || '',
       accessibilite: logement.accessibilite || '',
+      equipements_texte: equipementsStr,
       photos: []
     };
     this.uploadedPhotosPreviews = (logement.photos || []).map((p: any) => p?.url || p || '').filter((u: string) => !!u);
@@ -2022,6 +2224,11 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
         this.cdr.detectChanges();
       }
     });
+  }
+
+  onVilleInput(): void {
+    this.loadQuartiersForVille(this.newLogement.ville);
+    this.onAddressChange();
   }
 
   onVilleChange(): void {
@@ -2113,28 +2320,55 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   sauvegarderLogement(): void {
+    const equipementsTexte = (this.newLogement.equipements_texte || '').trim();
+    const equipementsListe = equipementsTexte
+      ? equipementsTexte.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0)
+      : [];
+
     const payload = {
       ...this.newLogement,
+      ville: (this.newLogement.ville || '').trim(),
+      quartier: (this.newLogement.quartier || '').trim(),
+      equipements_texte: equipementsTexte,
+      equipements: equipementsTexte,
+      equipements_liste: equipementsListe,
       photos: this.uploadedPhotosPreviews
     };
 
     if (this.modeEditionLogement && this.editingLogementId) {
-      this.logementService.updateLogement(this.editingLogementId, payload).subscribe({
-        next: () => {
+      const editId = this.editingLogementId;
+      this.logementService.updateLogement(editId, payload).subscribe({
+        next: (updated) => {
           this.modalAlert.success('Logement modifié avec succès !', 'Logement Mis à Jour');
           this.fermerModalLogement();
-          this.loadAll();
+
+          // Placer le bien modifié au tout début du tableau
+          const existing = this.logements.find(l => l.id === editId);
+          const merged = { ...existing, ...payload, ...(updated || {}), id: editId };
+          this.logements = [merged, ...this.logements.filter(l => l.id !== editId)];
+
+          // Mise à jour immédiate des statistiques du gestionnaire (nombre de biens, répartition des types)
+          this.recalculerStatsLocales();
+          this.loadStats();
           this.cdr.markForCheck();
           this.cdr.detectChanges();
         },
         error: (err: any) => this.modalAlert.error(err.error?.message || 'Erreur lors de la modification', 'Erreur')
       });
     } else {
+      payload.statut = 'hors_ligne';
       this.logementService.createLogement(payload).subscribe({
-        next: () => {
-          this.modalAlert.success('Logement créé et publié avec succès !', 'Logement Publié');
+        next: (created) => {
+          this.modalAlert.success('Logement créé avec succès ! Il est actuellement enregistré en mode hors ligne.', 'Logement Enregistré');
           this.fermerModalLogement();
-          this.loadAll();
+
+          // Placer le bien nouvellement créé au tout début du tableau
+          const createdItem = { ...payload, ...(created || {}), statut: created?.statut || 'hors_ligne' };
+          this.logements = [createdItem, ...this.logements.filter(l => l.id !== createdItem.id)];
+
+          // Mise à jour immédiate des statistiques du gestionnaire (nombre de biens, répartition des types)
+          this.recalculerStatsLocales();
+          this.loadStats();
           this.cdr.markForCheck();
           this.cdr.detectChanges();
         },
@@ -2154,7 +2388,9 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
       this.logementService.deleteLogement(logement.id).subscribe({
         next: () => {
           this.modalAlert.success('Logement supprimé avec succès.', 'Supprimé');
-          this.loadAll();
+          this.logements = this.logements.filter(l => l.id !== logement.id);
+          this.recalculerStatsLocales();
+          this.loadStats();
           this.cdr.markForCheck();
           this.cdr.detectChanges();
         },
