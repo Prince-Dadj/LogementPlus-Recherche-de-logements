@@ -223,15 +223,18 @@ declare let L: any;
                   </h2>
                   <p class="text-muted small mb-0">
                     <i class="bi bi-pin-map me-1 text-primary"></i>
-                    <strong>{{ logement.adresse }}</strong> -{{ logement.quartier ? logement.quartier + ', ' : '' }}{{ logement.ville }} (Sénégal)
+                    <strong>{{ logement.adresse }}</strong> - {{ logement.quartier ? logement.quartier + ', ' : '' }}{{ logement.ville }} (Sénégal)
                   </p>
                 </div>
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-3">
                   <span class="badge bg-light text-dark border px-3 py-2 small" style="font-size: 11px;">
                     <i class="bi bi-crosshair me-1 text-primary"></i> GPS : {{ logement.latitude | number:'1.4-4' }}, {{ logement.longitude | number:'1.4-4' }}
                   </span>
-                  <a [href]="getGoogleMapsUrl()" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm rounded-2 px-3 shadow-sm">
+                  <a [href]="getGoogleMapsUrl()" target="_blank" rel="noopener noreferrer" class="d-lg-flex d-none btn btn-outline-primary btn-sm rounded-2 px-3 shadow-sm">
                     <i class="bi bi-box-arrow-up-right me-1"></i> Ouvrir dans Google Maps
+                  </a>
+                  <a [href]="getGoogleMapsUrl()" target="_blank" rel="noopener noreferrer" class="d-flex d-lg-none btn btn-outline-primary btn-sm rounded-2 px-3 shadow-sm">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Maps
                   </a>
                 </div>
               </div>

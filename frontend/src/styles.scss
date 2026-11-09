@@ -68,6 +68,14 @@ $box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   //font-family: 'Open Sans', sans-serif !important;
 //}
 
+html {
+    scroll-behavior: smooth;
+}
+
+#qui-sommes-nous {
+    scroll-margin-top: 100px;
+}
+
 .nav-link-custom {
   color: white !important;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;

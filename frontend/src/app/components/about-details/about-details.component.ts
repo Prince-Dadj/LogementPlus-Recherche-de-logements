@@ -15,7 +15,7 @@ interface FaqItem {
   template: `
     <div class="about-details-page">
       <!-- FIL D'ARIANE -->
-      <section class="details-breadcrumb-bar py-3 border-bottom bg-white">
+      <!-- <section class="details-breadcrumb-bar py-3 border-bottom bg-white">
         <div class="container">
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 small">
@@ -35,7 +35,7 @@ interface FaqItem {
             </ol>
           </nav>
         </div>
-      </section>
+      </section> -->
 
       <!-- =================================================================== -->
       <!-- SECTION 1 — HERO DE PRÉSENTATION INSTITUTIONNEL                     -->
@@ -45,10 +45,10 @@ interface FaqItem {
         <div class="container py-lg-4 position-relative" style="z-index: 2;">
           <div class="row align-items-center g-5">
             <div class="col-lg-7">
-              <span class="badge px-3 py-1 rounded-pill mb-3 hero-pill">
+              <!-- <span class="badge px-3 py-1 rounded-pill mb-3 hero-pill">
                 <i class="bi bi-building me-1"></i> Plateforme Numérique Immobilière
-              </span>
-              <h1 class="display-5 fw-bold mb-3" style="font-family: 'Poppins', sans-serif;">
+              </span> -->
+              <h1 class="display-5 fw-bold mb-3 text-secondary" style="font-family: 'Poppins', sans-serif;">
                 À propos de LogementPlus
               </h1>
               <p class="lead text-teal-light fw-semibold mb-3">
@@ -136,13 +136,13 @@ interface FaqItem {
             </div>
 
             <div class="col-lg-6 order-lg-1">
-              <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
+              <!-- <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
                 Identité de la plateforme
-              </span>
+              </span> -->
               <h2 class="h2 fw-bold text-dark mb-3" style="font-family: 'Poppins', sans-serif;">
                 Qui sommes-nous ?
               </h2>
-              <div class="lead-text mb-4 text-secondary" style="line-height: 1.8;">
+              <div class="lead-text mb-4 text-muted" style="line-height: 1.8;">
                 <p class="mb-3">
                   <strong>LogementPlus</strong> est une plateforme numérique dédiée à la recherche, à la réservation et à la gestion des logements.
                 </p>
@@ -185,9 +185,9 @@ interface FaqItem {
       <section class="py-5 bg-light-gradient border-bottom">
         <div class="container py-lg-4">
           <div class="text-center max-w-750 mx-auto mb-5">
-            <span class="badge px-3 py-1 rounded-pill bg-white text-primary border shadow-sm fw-semibold small mb-2 text-uppercase">
+            <!-- <span class="badge px-3 py-1 rounded-pill bg-white text-primary border shadow-sm fw-semibold small mb-2 text-uppercase">
               Raison d'être
-            </span>
+            </span> -->
             <h2 class="h2 fw-bold text-dark mb-3" style="font-family: 'Poppins', sans-serif;">
               Notre mission
             </h2>
@@ -200,7 +200,7 @@ interface FaqItem {
             <!-- Objectif 1 -->
             <div class="col-md-6 col-lg-4">
               <div class="mission-card p-4 rounded-4 bg-white border shadow-sm h-100">
-                <div class="mission-icon-box mb-3 bg-teal-subtle text-teal">
+                <div class="mission-icon-box mb-3 bg-dark-subtle text-teal">
                   <i class="bi bi-search-heart fs-4"></i>
                 </div>
                 <h3 class="h6 fw-bold text-dark mb-2">Simplifier la recherche de logements</h3>
@@ -272,9 +272,9 @@ interface FaqItem {
         <div class="container py-lg-4">
           <div class="row align-items-center g-5">
             <div class="col-lg-5">
-              <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
+              <!-- <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
                 Perspective d'avenir
-              </span>
+              </span> -->
               <h2 class="h2 fw-bold text-dark mb-3" style="font-family: 'Poppins', sans-serif;">
                 Notre vision
               </h2>
@@ -351,9 +351,9 @@ interface FaqItem {
       <section class="py-5 bg-light-gradient border-bottom">
         <div class="container py-lg-4">
           <div class="text-center max-w-700 mx-auto mb-5">
-            <span class="badge px-3 py-1 rounded-pill bg-white text-primary border shadow-sm fw-semibold small mb-2 text-uppercase">
+            <!-- <span class="badge px-3 py-1 rounded-pill bg-white text-primary border shadow-sm fw-semibold small mb-2 text-uppercase">
               Principes fondamentaux
-            </span>
+            </span> -->
             <h2 class="h2 fw-bold text-dark mb-2" style="font-family: 'Poppins', sans-serif;">
               Nos valeurs
             </h2>
@@ -379,7 +379,7 @@ interface FaqItem {
             <!-- 2. Transparence -->
             <div class="col-md-6 col-lg">
               <div class="value-card p-4 rounded-4 bg-white border text-center h-100 shadow-sm">
-                <div class="value-icon-circle mx-auto mb-3 text-teal bg-teal-subtle">
+                <div class="value-icon-circle mx-auto mb-3 text-teal bg-dark-subtle">
                   <i class="bi bi-eye fs-4"></i>
                 </div>
                 <h3 class="h6 fw-bold text-dark mb-2">2. Transparence</h3>
@@ -437,9 +437,9 @@ interface FaqItem {
       <section class="py-5 bg-white border-bottom">
         <div class="container py-lg-4">
           <div class="text-center max-w-700 mx-auto mb-5">
-            <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
+            <!-- <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
               Fonctionnalités disponibles
-            </span>
+            </span> -->
             <h2 class="h2 fw-bold text-dark mb-2" style="font-family: 'Poppins', sans-serif;">
               Nos services
             </h2>
@@ -462,7 +462,7 @@ interface FaqItem {
                   </div>
                 </div>
 
-                <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small text-secondary">
+                <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small text-muted">
                   <li class="d-flex align-items-start gap-2">
                     <i class="bi bi-check-circle-fill text-primary mt-1"></i>
                     <span><strong>Consultation</strong> des logements disponibles dans les différentes zones.</span>
@@ -495,7 +495,7 @@ interface FaqItem {
             <div class="col-lg-4">
               <div class="service-box p-4 rounded-4 border bg-white h-100 shadow-sm">
                 <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
-                  <div class="service-badge-icon bg-teal text-white rounded-3 d-flex align-items-center justify-content-center">
+                  <div class="service-badge-icon bg-secondary text-white rounded-3 d-flex align-items-center justify-content-center">
                     <i class="bi bi-buildings-fill fs-4"></i>
                   </div>
                   <div>
@@ -504,29 +504,29 @@ interface FaqItem {
                   </div>
                 </div>
 
-                <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small text-secondary">
+                <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small text-muted">
                   <li class="d-flex align-items-start gap-2">
-                    <i class="bi bi-check-circle-fill text-teal mt-1"></i>
+                    <i class="bi bi-check-circle-fill text-secondary mt-1"></i>
                     <span><strong>Gestion complète</strong> des logements (création, mise à jour, publication ou mise hors-ligne).</span>
                   </li>
                   <li class="d-flex align-items-start gap-2">
-                    <i class="bi bi-check-circle-fill text-teal mt-1"></i>
+                    <i class="bi bi-check-circle-fill text-secondary mt-1"></i>
                     <span><strong>Configuration des informations</strong> (tarifs, caractéristiques, équipements et règles).</span>
                   </li>
                   <li class="d-flex align-items-start gap-2">
-                    <i class="bi bi-check-circle-fill text-teal mt-1"></i>
+                    <i class="bi bi-check-circle-fill text-secondary mt-1"></i>
                     <span><strong>Consultation organisée</strong> des demandes de réservation reçues.</span>
                   </li>
                   <li class="d-flex align-items-start gap-2">
-                    <i class="bi bi-check-circle-fill text-teal mt-1"></i>
+                    <i class="bi bi-check-circle-fill text-secondary mt-1"></i>
                     <span><strong>Validation ou refus</strong> des demandes avec indication du motif si nécessaire.</span>
                   </li>
                   <li class="d-flex align-items-start gap-2">
-                    <i class="bi bi-check-circle-fill text-teal mt-1"></i>
+                    <i class="bi bi-check-circle-fill text-secondary mt-1"></i>
                     <span><strong>Tableau de bord de suivi</strong> des réservations et des biens administrés.</span>
                   </li>
                   <li class="d-flex align-items-start gap-2">
-                    <i class="bi bi-check-circle-fill text-teal mt-1"></i>
+                    <i class="bi bi-check-circle-fill text-secondary mt-1"></i>
                     <span><strong>Consultation des données clés</strong> nécessaires à l'exercice de l'activité.</span>
                   </li>
                 </ul>
@@ -546,7 +546,7 @@ interface FaqItem {
                   </div>
                 </div>
 
-                <div class="text-secondary small" style="line-height: 1.7;">
+                <div class="text-muted small" style="line-height: 1.7;">
                   <p class="mb-2">
                     Dans l'organisation actuelle de LogementPlus, les propriétaires confient la commercialisation et l'administration de leurs biens aux <strong>gestionnaires et agences agréés</strong>.
                   </p>
@@ -572,9 +572,9 @@ interface FaqItem {
       <section class="py-5 bg-light-gradient border-bottom">
         <div class="container py-lg-4">
           <div class="text-center max-w-700 mx-auto mb-5">
-            <span class="badge px-3 py-1 rounded-pill bg-white text-primary border shadow-sm fw-semibold small mb-2 text-uppercase">
+            <!-- <span class="badge px-3 py-1 rounded-pill bg-white text-primary border shadow-sm fw-semibold small mb-2 text-uppercase">
               Parcours utilisateur
-            </span>
+            </span> -->
             <h2 class="h2 fw-bold text-dark mb-2" style="font-family: 'Poppins', sans-serif;">
               Comment fonctionne LogementPlus ?
             </h2>
@@ -640,9 +640,9 @@ interface FaqItem {
       <section class="py-5 bg-white border-bottom">
         <div class="container py-lg-4">
           <div class="text-center max-w-700 mx-auto mb-5">
-            <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
+            <!-- <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
               Avantages concrets
-            </span>
+            </span> -->
             <h2 class="h2 fw-bold text-dark mb-2" style="font-family: 'Poppins', sans-serif;">
               Pourquoi choisir LogementPlus ?
             </h2>
@@ -736,7 +736,7 @@ interface FaqItem {
       <!-- =================================================================== -->
       <!-- SECTION 9 — NOTRE ENGAGEMENT                                        -->
       <!-- =================================================================== -->
-      <section class="py-5 bg-light-gradient border-bottom">
+      <!-- <section class="py-5 bg-light-gradient border-bottom">
         <div class="container py-lg-4">
           <div class="p-4 p-md-5 rounded-4 bg-white border shadow-sm max-w-850 mx-auto text-center position-relative">
             <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-3 text-uppercase">
@@ -752,7 +752,7 @@ interface FaqItem {
             </div>
           </div>
         </div>
-      </section>
+      </section> -->
 
       <!-- =================================================================== -->
       <!-- SECTION 10 — QUESTIONS FRÉQUENTES (ACCORDÉON INTERACTIF)           -->
@@ -760,9 +760,9 @@ interface FaqItem {
       <section class="py-5 bg-white border-bottom">
         <div class="container py-lg-4">
           <div class="text-center max-w-700 mx-auto mb-5">
-            <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
+            <!-- <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
               FAQ LogementPlus
-            </span>
+            </span> -->
             <h2 class="h2 fw-bold text-dark mb-2" style="font-family: 'Poppins', sans-serif;">
               Questions fréquentes
             </h2>
@@ -791,7 +791,7 @@ interface FaqItem {
                     class="accordion-collapse collapse" 
                     [class.show]="activeFaqIndex === $index"
                     [attr.aria-labelledby]="'heading' + $index">
-                    <div class="accordion-body px-4 pb-4 pt-1 text-secondary small" style="line-height: 1.7;">
+                    <div class="accordion-body px-4 pb-4 pt-1 text-muted small" style="line-height: 1.7;">
                       {{ faq.answer }}
                     </div>
                   </div>
@@ -810,7 +810,7 @@ interface FaqItem {
           <div class="final-cta-card p-4 p-md-5 rounded-4 text-white text-center position-relative overflow-hidden shadow-lg">
             <div class="cta-glow-bg"></div>
             <div class="position-relative" style="z-index: 2; max-width: 720px; margin: 0 auto;">
-              <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 rounded-pill mb-3 small">
+              <span class="badge bg-white bg-opacity-20 text-muted border border-white border-opacity-25 px-3 py-1 rounded-pill mb-3 small">
                 <i class="bi bi-house-door-fill me-1 text-warning"></i> Rejoignez LogementPlus
               </span>
               <h2 class="display-6 fw-bold mb-3 text-white" style="font-family: 'Poppins', sans-serif;">

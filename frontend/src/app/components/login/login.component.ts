@@ -100,6 +100,15 @@ import { AuthService } from '../../services/auth.service';
               </div>
             }
 
+            @if (isSessionExpired) {
+              <div class="alert alert-warning d-flex align-items-center gap-2 small py-2 mb-3 rounded-3 border-warning border-opacity-50" role="alert">
+                <i class="bi bi-clock-history text-warning flex-shrink-0 fs-5"></i>
+                <div class="small fw-semibold text-dark">
+                  Session expirée : Vous avez été déconnecté suite à une inactivité prolongée. Veuillez vous reconnecter.
+                </div>
+              </div>
+            }
+
             @if (errorMessage) {
               <div class="alert alert-danger d-flex align-items-center gap-2 small py-2 mb-3 rounded-2" role="alert">
                 <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
@@ -278,10 +287,14 @@ export class LoginComponent implements OnInit{
   errorMessage = '';
   successMessage = '';
   redirectUrl = '';
+  isSessionExpired = false;
 
   ngOnInit(): void {
     // Écoute des query params (?mode=register ou ?mode=login ou ?role=admin ou ?redirect=...)
     this.route.queryParams.subscribe(params => {
+      if (params['reason'] === 'session_expired') {
+        this.isSessionExpired = true;
+      }
       if (params['redirect']) {
         this.redirectUrl = params['redirect'];
       }

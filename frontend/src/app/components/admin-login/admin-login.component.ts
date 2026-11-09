@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ModalAlertService } from '../../services/modal-alert.service';
 
@@ -26,6 +26,16 @@ import { ModalAlertService } from '../../services/modal-alert.service';
               </div>
 
               <div class="card-body p-4 p-md-5">
+                <!-- Alerte session expirée -->
+                @if (isSessionExpired) {
+                  <div class="alert alert-warning d-flex align-items-center gap-2 small py-2 mb-3 rounded-3 border-warning border-opacity-50" role="alert">
+                    <i class="bi bi-clock-history text-warning flex-shrink-0 fs-5"></i>
+                    <div class="small fw-semibold text-dark">
+                      Session expirée : Vous avez été déconnecté suite à une inactivité prolongée. Veuillez vous reconnecter.
+                    </div>
+                  </div>
+                }
+
                 <!-- Message d'erreur -->
                 @if (errorMessage) {
                   <div class="alert alert-danger d-flex align-items-center gap-2 small py-2 mb-3 rounded-3" role="alert">
@@ -122,9 +132,10 @@ import { ModalAlertService } from '../../services/modal-alert.service';
     </div>
   `
 })
-export class AdminLoginComponent {
+export class AdminLoginComponent implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private modalAlert = inject(ModalAlertService);
 
   email = 'laminecamara@gmail.com';
@@ -132,6 +143,15 @@ export class AdminLoginComponent {
   showPassword = false;
   isLoading = false;
   errorMessage = '';
+  isSessionExpired = false;
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['reason'] === 'session_expired') {
+        this.isSessionExpired = true;
+      }
+    });
+  }
 
   fillDemo(role: 'admin' | 'superadmin') {
     if (role === 'admin') {

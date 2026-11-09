@@ -305,7 +305,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
 
         <!-- Grille des Logements (Cartes 16:9 compactes, badges statut, prix en gras, bouton WhatsApp direct) -->
         <div class="row g-3">
-          @for (logement of displayedLogements.slice(0, 9); track logement.id) {
+          @for (logement of displayedLogements.slice(0, 6); track logement.id) {
             <div class="col-md-6 col-lg-4">
               <div class="card housing-card h-100 border-0">
                 <!-- Image 16:9 avec badge de type et favori -->
