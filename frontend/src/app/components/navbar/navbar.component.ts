@@ -35,12 +35,17 @@ import { AuthService } from '../../services/auth.service';
               </a>
             </li>
             <li class="nav-item me-2">
-              <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom " routerLink="/logements" routerLinkActive="active opacity-100 fw-bold">
+              <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/logements" routerLinkActive="active opacity-100 fw-bold">
                 <i class="bi bi-search me-1"></i> Explorer & Carte
               </a>
             </li>
             <li class="nav-item me-2">
-              <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom " routerLink="/contact" routerLinkActive="active opacity-100 fw-bold">
+              <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/about" routerLinkActive="active opacity-100 fw-bold">
+                <i class="bi bi-info-circle me-1"></i> À propos
+              </a>
+            </li>
+            <li class="nav-item me-2">
+              <a class="nav-link text-white opacity-90 px-3 fw-bold nav-link-custom" routerLink="/contact" routerLinkActive="active opacity-100 fw-bold">
                 <i class="bi bi-headset me-1"></i> Contact
               </a>
             </li>

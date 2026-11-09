@@ -601,16 +601,18 @@ import { Subscription } from 'rxjs';
             <div class="col-12 col-lg-8 d-flex flex-column" [class.d-none]="!mobileShowConversation" [class.d-lg-flex]="true">
               @if (activeConversation) {
                 <!-- Entête conversation -->
-                <div class="p-3 border-bottom bg-white d-flex align-items-center justify-content-between flex-wrap gap-2">
-                  <div class="d-flex align-items-center gap-2">
-                    <!-- Bouton Retour visible sur Mobile (< lg) -->
-                    <button type="button" 
-                            class="btn btn-outline-secondary btn-sm rounded-2 d-lg-none me-1 d-flex align-items-center gap-1 shadow-sm px-2 py-1"
+                 
+                <div class="p-3 border-bottom bg-white d-block flex-wrap gap-2">
+                  <button type="button" 
+                            class="btn btn-outline-secondary btn-sm rounded-2 d-lg-none me-1 mb-2 d-flex align-items-center gap-1 shadow-sm px-2 py-1"
                             (click)="retourListeConversations()"
                             title="Retour aux conversations">
                       <i class="bi bi-arrow-left"></i>
-                      <span class="small fw-semibold">Retour</span>
+                       <span class="small fw-semibold">Retour</span> 
                     </button>
+                  <div class="d-flex align-items-center gap-2">
+                    <!-- Bouton Retour visible sur Mobile (< lg) -->
+                    
 
                     <img [src]="activeConversation.interlocuteur.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80'" 
                          class="rounded-circle object-fit-cover shadow-sm flex-shrink-0" 
@@ -634,12 +636,12 @@ import { Subscription } from 'rxjs';
                     </div>
                   </div>
 
-                  <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                  <!-- <div class="d-flex align-items-center gap-2 flex-shrink-0">
                     <a [href]="'tel:' + (activeConversation.interlocuteur.telephone || '+221338002026')" class="btn btn-outline-primary btn-sm rounded-2 px-3">
                       <i class="bi bi-telephone-fill me-1"></i>
                       <span class="d-none d-sm-inline">Appeler</span>
                     </a>
-                  </div>
+                  </div> -->
                 </div>
 
                 <!-- Messages scrollables avec overflow horizontal évité et bulles responsives -->
@@ -1323,12 +1325,12 @@ export class TenantDashboardComponent implements OnInit, OnDestroy {
     this.loadFavoris();
     this.loadDossier();
 
-    console.log(this.auth.currentUser())
+   
 
     // Abonnement aux conversations de messagerie
     this.convSub = this.messageService.conversations$.subscribe(convs => {
       this.conversations = convs || [];
-      
+      console.log(this.conversations)
       if (!this.activeConvId && this.conversations.length > 0) {
         this.activeConvId = this.conversations[0].id;
         
@@ -1417,7 +1419,7 @@ export class TenantDashboardComponent implements OnInit, OnDestroy {
     this.reservationService.getMesReservations().subscribe({
       next: (data) => {
         const user = this.currentUser();
-        this.reservations = (data.filter(res => res.locataire_id === user?.id) || []).map(r => {
+        this.reservations = (data || []).map(r => {
           if (!r.locataire && user) {
             r.locataire = user;
           }

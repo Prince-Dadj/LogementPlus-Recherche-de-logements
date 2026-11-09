@@ -24,7 +24,7 @@ Chart.register(...registerables);
   template: `
     <div class="container-fluid py-4 px-lg-4">
       <div class="row g-4">
-        <!-- Barre latérale à gauche (CDC 8.6) -->
+        <!-- Barre latérale à gauche  -->
         <div class="col-lg-3">
           <div class="card border-0 shadow-sm rounded-2 p-3 bg-white sticky-top" style="top: 80px;">
             <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
@@ -182,14 +182,14 @@ Chart.register(...registerables);
             <div class="card border-0 shadow-sm rounded-2 bg-white overflow-hidden mb-4">
               <div class="card-header bg-white border-bottom p-3 d-flex align-items-center justify-content-between">
                 <h3 class="h6 fw-bold mb-0 text-dark">
-                  <i class="bi bi-calendar2-check text-primary me-2"></i> Demandes de réservations à traiter (RF-43)
+                  <i class="bi bi-calendar2-check text-primary me-2"></i> Demandes de réservations à traiter
                 </h3>
               </div>
               <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                   <thead class="table-light small">
                     <tr>
-                      <th>Réf</th>
+                      <!-- <th>Réf</th> -->
                       <th>Logement</th>
                       <th>Locataire</th>
                       <th>Période</th>
@@ -201,7 +201,7 @@ Chart.register(...registerables);
                   <tbody>
                     @for (r of reservations; track r.id) {
                       <tr>
-                        <td class="small fw-semibold font-monospace">#RES-{{ r.id }}</td>
+                        <!-- <td class="small fw-semibold font-monospace">#RES-{{ r.id }}</td> -->
                         <td>
                           <strong class="d-block small text-dark text-truncated" style="max-width: 120px;">{{ r.logement?.titre }}</strong>
                           <span class="text-muted small">{{ r.logement?.quartier }}</span>
@@ -233,7 +233,7 @@ Chart.register(...registerables);
                             @if (r.statut === 'en_attente') {
                               <div class="btn-group btn-group-sm">
                                 <!-- Voir dossier locataire -->
-                                <button class="btn btn-outline-primary" (click)="ouvrirDossier(r)"><i class="bi bi-folder2-open me-1"></i>Dossier</button>
+                                <button class="btn btn-outline-primary" (click)="ouvrirDossier(r)"><i class="bi bi-folder2-open me-1"></i></button>
                                 <!-- Valider -->
                                 <button class="btn btn-success" [disabled]="traitementEnCoursId === r.id" (click)="valider(r.id)" title="Valider la réservation">
                                   @if (traitementEnCoursId === r.id) {
@@ -241,11 +241,11 @@ Chart.register(...registerables);
                                   } @else {
                                     <i class="bi bi-check-lg me-1"></i>
                                   }
-                                  Valider
+                                  
                                 </button>
                                 <!-- Refuser -->
                                 <button class="btn btn-outline-danger" [disabled]="traitementEnCoursId === r.id" (click)="ouvrirRefusModal(r)" title="Refuser la réservation">
-                                  <i class="bi bi-x-lg me-1"></i> Refuser
+                                  <i class="bi bi-x-lg me-1"></i>
                                 </button>
                               </div>
                             } @else {
@@ -277,10 +277,14 @@ Chart.register(...registerables);
             <div class="card border-0 shadow-sm rounded-2 bg-white overflow-hidden mb-4">
               <div class="card-header bg-white border-bottom p-3 d-flex align-items-center justify-content-between">
                 <h3 class="h6 fw-bold mb-0 text-dark">
-                  <i class="bi bi-house-door text-primary me-2"></i> Catalogue de mes logements (RF-40)
+                  <i class="bi bi-house-door text-primary me-2"></i> Catalogue de mes logements
                 </h3>
-                <button class="btn btn-primary btn-sm rounded-2 px-3" (click)="ouvrirModalAjout()">
+                
+                <button class="d-lg-flex d-none btn btn-primary btn-sm rounded-2 px-3" (click)="ouvrirModalAjout()">
                   <i class="bi bi-plus-lg me-1"></i> Ajouter un logement
+                </button>
+                 <button class="d-flex d-lg-none btn btn-primary btn-sm rounded-2 px-3" (click)="ouvrirModalAjout()">
+                  <i class="bi bi-plus-lg me-1"></i>
                 </button>
               </div>
 
@@ -341,7 +345,7 @@ Chart.register(...registerables);
                                class="form-control form-control-sm" 
                                [(ngModel)]="newLogement.quartier" 
                                name="quartier" 
-                               placeholder="Ex: Almadies, Fann, Sor, Cocody..." 
+                               placeholder="Ex: Almadies, Fann, Sor, Mermoz..." 
                                (input)="onAddressChange()" 
                                required>
                         <datalist id="quartiersList">
@@ -450,7 +454,7 @@ Chart.register(...registerables);
                       <div class="col-12">
                         <label class="form-label small fw-semibold">
                           <i class="bi bi-images me-1 text-primary"></i>Photos du logement
-                          <span class="text-muted fw-normal">(min. 3 recommandées - CDC RF-41)</span>
+                          <span class="text-muted fw-normal">(min. 3 recommandées)</span>
                         </label>
                         <div class="border rounded-3 p-3 bg-white">
                           <label class="btn btn-outline-primary btn-sm mb-3 d-inline-flex align-items-center gap-2" style="cursor:pointer;">
@@ -496,7 +500,7 @@ Chart.register(...registerables);
                         </button>
                         <button type="submit" class="btn btn-primary btn-sm px-4 fw-semibold">
                           <i class="bi {{ modeEditionLogement ? 'bi-check-lg' : 'bi-save2' }} me-1"></i>
-                          {{ modeEditionLogement ? 'Enregistrer les modifications' : 'Enregistrer le logement (Hors ligne)' }}
+                          {{ modeEditionLogement ? 'Enregistrer' : 'Ajouter (Hors ligne)' }}
                         </button>
                       </div>
 
@@ -591,7 +595,7 @@ Chart.register(...registerables);
           @if (activeTab === 'finances') {
             <div class="card border-0 shadow-sm rounded-2 p-4 bg-white mb-4">
               <h3 class="h6 fw-bold mb-3 text-dark">
-                <i class="bi bi-wallet2 text-primary me-2"></i> Suivi des encaissements & Reversements (CDC RF-45)
+                <i class="bi bi-wallet2 text-primary me-2"></i> Suivi des encaissements & Reversements
               </h3>
               <p class="text-muted small">
                 La plateforme prélève une commission de 10% sur les réservations validées. Les reversements nets (90%) sont versés directement sur votre compte bancaire ou Mobile Money selon le calendrier convenu.

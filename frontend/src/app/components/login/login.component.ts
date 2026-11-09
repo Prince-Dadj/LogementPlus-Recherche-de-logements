@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, ChangeDetectorRef} from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
@@ -293,7 +293,7 @@ export class LoginComponent implements OnInit{
 
       if (params['role'] === 'admin') {
         this.selectedRole = 'admin';
-        this.email = 'admin1@example.com';
+        this.email = 'laminecamara@gmail.com';
       }
     });
   }
@@ -305,7 +305,7 @@ export class LoginComponent implements OnInit{
     if (role === 'locataire') {
       this.email = 'locataire@example.com';
     } else {
-      this.email = 'admin1@example.com';
+      this.email = 'laminecamara@gmail.com';
     }
   }
 
@@ -323,7 +323,7 @@ export class LoginComponent implements OnInit{
 
   fillManagerDemo() {
     this.selectedRole = 'admin';
-    this.email = 'admin1@example.com';
+    this.email = 'laminecamara@gmail.com';
     this.password = 'password123';
   }
 

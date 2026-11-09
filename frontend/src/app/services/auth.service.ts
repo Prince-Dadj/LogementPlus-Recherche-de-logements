@@ -20,13 +20,13 @@ const DEMO_ACCOUNTS: { email: string; password: string; user: User; token: strin
     } as User
   },
   {
-    email: 'admin1@example.com',
+    email: 'laminecamara@gmail.com',
     password: 'password123',
     token: 'demo_token_admin_001',
     user: {
-      id: 2,
-      name: 'Moussa Ndiaye (Gestionnaire)',
-      email: 'admin1@example.com',
+      id: 7,
+      name: 'Lamine Camara',
+      email: 'laminecamara@gmail.com',
       role: 'admin',
       statut: 'actif',
       telephone: '+221 77 200 00 01'
@@ -144,7 +144,7 @@ export class AuthService {
 
     return throwError(() => ({
       error: {
-        message: `Identifiants incorrects. Comptes démo disponibles :\n• locataire@example.com / password123\n• admin1@example.com / password123`
+        message: `Identifiants incorrects. Comptes démo disponibles :\n• locataire@example.com / password123\n• laminecamara@gmail.com / password123`
       }
     }));
   }

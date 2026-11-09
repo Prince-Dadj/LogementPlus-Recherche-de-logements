@@ -96,7 +96,7 @@ import { ModalAlertService } from '../../services/modal-alert.service';
                   <span class="small text-muted d-block text-center mb-2">Comptes de test rapide (1-clic) :</span>
                   <div class="d-flex gap-2">
                     <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1 rounded-pill" (click)="fillDemo('admin')">
-                      <i class="bi bi-building me-1"></i> Agence Ivoire
+                      <i class="bi bi-building me-1"></i> Gestionnaire
                     </button>
                     <button type="button" class="btn btn-outline-danger btn-sm flex-grow-1 rounded-pill" (click)="fillDemo('superadmin')">
                       <i class="bi bi-shield-lock me-1"></i> Super Admin
@@ -127,7 +127,7 @@ export class AdminLoginComponent {
   private router = inject(Router);
   private modalAlert = inject(ModalAlertService);
 
-  email = 'admin@ivoire-habitat.com';
+  email = 'laminecamara@gmail.com';
   password = 'password123';
   showPassword = false;
   isLoading = false;
@@ -135,7 +135,7 @@ export class AdminLoginComponent {
 
   fillDemo(role: 'admin' | 'superadmin') {
     if (role === 'admin') {
-      this.email = 'admin@ivoire-habitat.com';
+      this.email = 'laminecamara@gmail.com';
       this.password = 'password123';
     } else {
       this.email = 'superadmin@logementplus.com';

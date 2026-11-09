@@ -311,7 +311,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
                 <!-- Image 16:9 avec badge de type et favori -->
                 <div class="card-img-wrapper position-relative">
                   <img [src]="logement.image_principale" [alt]="logement.titre" loading="eager">
-                  <span class="badge-type ">{{ logement.type }}</span>
+                  <span class="badge-type text-uppercase">{{ logement.type }}</span>
                   <button class="fav-btn" (click)="toggleFav(logement)">
                     <i class="bi" [class.bi-heart-fill]="isFav(logement.id)" [class.bi-heart]="!isFav(logement.id)"></i>
                   </button>

@@ -236,7 +236,7 @@ declare let L: any;
                 </div>
                 <div class="col-6">
                   <label class="form-label small fw-semibold text-dark">Surface min</label>
-                  <div class="input-group input-group-sm">
+                  <div class="input-group input-group-md">
                     <input type="number" class="form-control" placeholder="m²" [(ngModel)]="filters.surface_min" name="surface_min" min="0" (change)="loadLogements()">
                     <span class="input-group-text bg-light text-muted">m²</span>
                   </div>

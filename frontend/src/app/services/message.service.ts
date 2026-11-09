@@ -278,11 +278,11 @@ export class MessageService {
 
     // Gestionnaire réel du logement
     const admin = reservation.logement?.admin || {
-      id: reservation.logement?.admin_id || 2,
-      name: 'Moussa Ndiaye (Gestionnaire)',
+      id: reservation.logement?.admin_id || 7,
+      name: 'Lamine Camara (Gestionnaire)',
       raison_sociale: 'Teranga Prestige Immobilier Dakar',
       telephone: '+221 77 200 00 01',
-      email: 'admin1@example.com'
+      email: 'laminecamara@gmail.com'
     };
 
     // Locataire
@@ -339,7 +339,7 @@ export class MessageService {
   public emettreValidationGestionnaire(
     reservation: Reservation,
     logementTitre: string,
-    adminName: string = 'Moussa Ndiaye (Gestionnaire)'
+    adminName: string = 'Gestionnaire'
   ): void {
     const db = this.getDB();
     const convId = `conv_res_${reservation.id}`;
@@ -395,7 +395,7 @@ export class MessageService {
     reservation: Reservation,
     logementTitre: string,
     motif: string,
-    adminName: string = 'Moussa Ndiaye (Gestionnaire)'
+    adminName: string = 'Gestionnaire'
   ): void {
     const db = this.getDB();
     const convId = `conv_res_${reservation.id}`;

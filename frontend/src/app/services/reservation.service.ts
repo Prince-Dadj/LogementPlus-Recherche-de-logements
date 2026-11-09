@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, catchError, map } from 'rxjs';
+import { Observable, of, catchError, map, tap } from 'rxjs';
 import { RecuPaiement, Reservation, ReservationCalculation } from '../models/models';
 import { AuthService } from './auth.service';
 import { LogementService } from './logement.service';
@@ -160,7 +160,35 @@ export class ReservationService {
     this.messageService.creerConversationPourReservation(newRes);
 
     // Envoi backend API en parallèle avec repli
-    return this.http.post<Reservation>(`${this.apiUrl}/reservations`, data, { headers }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/reservations`, data, { headers }).pipe(
+      tap((apiCreated: any) => {
+        if (apiCreated && apiCreated.id) {
+          const list = this.getReservationsFromStorage();
+          const idx = list.findIndex(r => r.id === newRes.id);
+          const fullRes: Reservation = {
+            ...newRes,
+            ...apiCreated,
+            statut: 'en_attente',
+            logement: apiCreated.logement || newRes.logement || logement,
+            locataire: apiCreated.locataire || newRes.locataire || user
+          };
+          if (idx !== -1) {
+            list[idx] = fullRes;
+          } else {
+            list.unshift(fullRes);
+          }
+          this.saveReservationsToStorage(list);
+        }
+      }),
+      map((apiCreated: any): Reservation => {
+        return {
+          ...newRes,
+          ...(apiCreated || {}),
+          statut: 'en_attente',
+          logement: apiCreated?.logement || newRes.logement || logement,
+          locataire: apiCreated?.locataire || newRes.locataire || user
+        };
+      }),
       catchError(() => of(newRes))
     );
   }
@@ -172,12 +200,22 @@ export class ReservationService {
     return this.http.get<Reservation[]>(`${this.apiUrl}/mes-reservations`, { headers }).pipe(
       catchError(() => of([])),
       map(apiRes => {
+        const apiList = Array.isArray(apiRes) ? apiRes : [];
+        const apiIds = new Set(apiList.map(r => r.id));
         const local = this.getReservationsFromStorage();
-        const base = (apiRes && apiRes.length > 0) ? apiRes : local;
+
+        // Récupérer les réservations locales non encore en base
+        const extraLocal = local.filter(r => !apiIds.has(r.id));
+        const combined = [...apiList, ...extraLocal];
+
         if (user && user.role === 'locataire') {
-          return base.filter(r => r.locataire_id === user.id || r.locataire?.id === user.id);
+          return combined.filter(r =>
+            Number(r.locataire_id) === Number(user.id) ||
+            Number(r.locataire?.id) === Number(user.id) ||
+            (user.email && (r.locataire?.email === user.email || (r as any).locataire_email === user.email))
+          );
         }
-        return base;
+        return combined;
       })
     );
   }
@@ -189,12 +227,27 @@ export class ReservationService {
     return this.http.get<Reservation[]>(`${this.apiUrl}/admin/reservations`, { headers }).pipe(
       catchError(() => of([])),
       map(apiRes => {
+        const apiList = Array.isArray(apiRes) ? apiRes : [];
+        const apiIds = new Set(apiList.map(r => r.id));
         const local = this.getReservationsFromStorage();
-        const base = (apiRes && apiRes.length > 0) ? apiRes : local;
-        if (user && user.role === 'admin') {
-          return base.filter(r => r.logement?.admin_id === user.id || r.logement?.admin?.id === user.id);
+
+        // Récupérer les réservations locales non encore en base
+        const extraLocal = local.filter(r => !apiIds.has(r.id));
+        const combined = [...apiList, ...extraLocal];
+
+        if (user) {
+          if (user.role === 'superadmin') {
+            return combined;
+          }
+          if (user.role === 'admin') {
+            return combined.filter(r =>
+              Number(r.logement?.admin_id) === Number(user.id) ||
+              Number(r.logement?.admin?.id) === Number(user.id) ||
+              (user.email && (r.logement?.admin?.email === user.email || (r.logement as any)?.email === user.email))
+            );
+          }
         }
-        return base;
+        return combined;
       })
     );
   }
@@ -209,7 +262,7 @@ export class ReservationService {
       res.statut = 'confirmee';
       this.saveReservationsToStorage(all);
 
-      const adminNom = this.auth.currentUser()?.name || res.logement?.admin?.name || 'Moussa Ndiaye (Gestionnaire)';
+      const adminNom = this.auth.currentUser()?.name || res.logement?.admin?.name || 'Gestionnaire';
 
       // Émission automatique du message avec lien de paiement Phase 2
       this.messageService.emettreValidationGestionnaire(
@@ -240,7 +293,7 @@ export class ReservationService {
       res.motif_refus = motifFinal || undefined;
       this.saveReservationsToStorage(all);
 
-      const adminNom = this.auth.currentUser()?.name || res.logement?.admin?.name || 'Moussa Ndiaye (Gestionnaire)';
+      const adminNom = this.auth.currentUser()?.name || res.logement?.admin?.name || 'Gestionnaire';
 
       // Émission automatique du message explicatif au locataire
       this.messageService.emettreRefusGestionnaire(

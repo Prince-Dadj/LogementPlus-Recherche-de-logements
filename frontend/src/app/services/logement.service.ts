@@ -26,24 +26,51 @@ export class LogementService {
   // ─────────────────────────────────────────────
   // Initialisation : lecture localStorage, puis seed si absent
   // ─────────────────────────────────────────────
+  public isLogementSupprime(l: any): boolean {
+    if (!l) return false;
+    const adminName = (l.admin?.name || '').toLowerCase();
+    const adminEmail = (l.admin?.email || '').toLowerCase();
+    const titre = (l.titre || '').toLowerCase();
+    const quartier = (l.quartier || '').toLowerCase();
+    const ville = (l.ville || '').toLowerCase();
+
+    // Gestionnaires ciblés à supprimer totalement
+    if (adminName.includes('moussa ndiaye') || adminName.includes('cocody confort') || adminName.includes('ivoire habitat')) {
+      return true;
+    }
+    if (adminEmail === 'admin1@example.com' || adminEmail === 'admin@ivoire-habitat.com' || adminEmail === 'contact@residence-cocody.ci') {
+      return true;
+    }
+    // Logements liés à ces gestionnaires (ex-Abidjan et logements de Moussa Ndiaye)
+    if (Number(l.admin_id) === 8 || Number(l.admin_id) === 3 || (Number(l.admin_id) === 2 && (ville.includes('abidjan') || quartier.includes('cocody')))) {
+      return true;
+    }
+    if (titre.includes('cocody') || titre.includes('dokui') || titre.includes('riviera golf') || titre.includes('marcory zone 4') || titre.includes('villa prestige avec piscine & vue océan - les almadies')) {
+      return true;
+    }
+    return false;
+  }
+
   private initCatalog(): void {
     try {
       const saved = localStorage.getItem(this.storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          this.catalogueLogements = parsed.map((item: any) => {
-            if (item.titre?.includes('1AG1') || item.quartier?.toLowerCase().includes('saint-louis') || item.quartier === 'Sanar' || item.quartier === 'Ngallèle') {
-              item.ville = 'Saint-Louis';
-            }
-            // Corriger les coordonnées imprécises ou hors Sénégal (ex: Abidjan lat ~ 5.3)
-            if (!item.latitude || !item.longitude || item.latitude < 11 || item.latitude > 18) {
-              const geo = geocodeSenegal(item.ville, item.quartier);
-              item.latitude = geo.lat;
-              item.longitude = geo.lng;
-            }
-            return item;
-          });
+          this.catalogueLogements = parsed
+            .filter((item: any) => !this.isLogementSupprime(item))
+            .map((item: any) => {
+              if (item.titre?.includes('1AG1') || item.quartier?.toLowerCase().includes('saint-louis') || item.quartier === 'Sanar' || item.quartier === 'Ngallèle') {
+                item.ville = 'Saint-Louis';
+              }
+              // Corriger les coordonnées imprécises ou hors Sénégal (ex: Abidjan lat ~ 5.3)
+              if (!item.latitude || !item.longitude || item.latitude < 11 || item.latitude > 18) {
+                const geo = geocodeSenegal(item.ville, item.quartier);
+                item.latitude = geo.lat;
+                item.longitude = geo.lng;
+              }
+              return item;
+            });
           this.saveCatalogToStorage();
           return;
         }
@@ -402,7 +429,7 @@ export class LogementService {
   // Filtrage précis et rigoureux multi-critères
   // ─────────────────────────────────────────────
   filterLogementsList(list: Logement[], filters: any = {}): Logement[] {
-    let result = (list || []).filter(l => l.statut === 'publie');
+    let result = (list || []).filter(l => l.statut === 'publie' && !this.isLogementSupprime(l));
 
     // 1. Recherche plein texte
     if (filters.q && filters.q.trim()) {
@@ -544,7 +571,7 @@ export class LogementService {
   // Retourne le catalogue complet avec statuts d'occupation dynamiques
   getSenegalCatalog(): Logement[] {
     const occList = this.getOccupiedIdsFromStorage();
-    return this.catalogueLogements.map(l => {
+    return this.catalogueLogements.filter(l => !this.isLogementSupprime(l)).map(l => {
       const isOcc = occList.includes(l.id) || !!l.est_occupe;
       return {
         ...l,
@@ -614,23 +641,25 @@ export class LogementService {
 
         // Conserver les logements créés localement qui ne sont pas encore en base ou en cas de divergence
         const localItems = this.catalogueLogements.filter(l => {
+          if (this.isLogementSupprime(l)) return false;
           if (backendIds.has(l.id)) return false;
           if (isSuperAdmin) return true;
           return !adminId || l.admin_id === adminId || l.admin?.id === adminId;
         });
 
-        return [...list, ...localItems];
+        return [...list.filter(l => !this.isLogementSupprime(l)), ...localItems];
       }),
       catchError(() => {
         // Fallback : filtrer par admin_id de l'utilisateur connecté
         const user = this.auth.currentUser();
         const adminId = user?.id;
         const isSuperAdmin = user?.role === 'superadmin';
+        const validLocal = this.catalogueLogements.filter(l => !this.isLogementSupprime(l));
         const mesLogements = isSuperAdmin
-          ? this.catalogueLogements
+          ? validLocal
           : (adminId
-            ? this.catalogueLogements.filter(l => l.admin_id === adminId || l.admin?.id === adminId)
-            : this.catalogueLogements.slice(0, 3));
+            ? validLocal.filter(l => l.admin_id === adminId || l.admin?.id === adminId)
+            : validLocal.slice(0, 3));
         return of(mesLogements);
       })
     );
@@ -684,13 +713,14 @@ export class LogementService {
     const statutParDefaut = data.statut || 'hors_ligne';
     data.statut = statutParDefaut;
 
+    const currentAdminId = user?.id || 7;
     const newLogement: Logement = {
       id: Date.now(),
       ...data,
       statut: statutParDefaut,
-      admin_id: user?.id || 2,
+      admin_id: currentAdminId,
       admin: {
-        id: user?.id || 2,
+        id: currentAdminId,
         name: user?.name || 'Gestionnaire',
         email: (user as any)?.email || '',
         raison_sociale: data.raison_sociale || 'Agence Immobilière'

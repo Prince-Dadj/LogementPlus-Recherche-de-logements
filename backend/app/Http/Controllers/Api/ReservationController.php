@@ -88,8 +88,9 @@ class ReservationController extends Controller
         $frais = (float) $logement->frais_service;
         $total = $loyer + $caution + $frais;
 
-        // Statut initial selon le mode configuré par le logement (RF-21)
-        $statutInitial = $logement->mode_reservation !== 'immediate' ? 'confirmee' : 'en_attente';
+        // Statut initial : Toute demande de réservation démarre systématiquement en 'en_attente'
+        // afin que le gestionnaire puisse l'examiner et la valider ou la refuser (RF-21, RF-43)
+        $statutInitial = 'en_attente';
 
         $reservation = Reservation::create([
             'locataire_id' => $request->user()->id,
@@ -105,17 +106,6 @@ class ReservationController extends Controller
             'politique_annulation_appliquee' => $logement->politique_annulation,
         ]);
 
-        // Génération automatique du contrat si réservation confirmée (RF-24)
-        if ($statutInitial === 'confirmee') {
-            Contrat::create([
-                'reservation_id' => $reservation->id,
-                'numero' => 'CTR-' . date('Y') . '-' . str_pad($reservation->id, 5, '0', STR_PAD_LEFT),
-                'fichier_pdf' => 'contrats/contrat_' . $reservation->id . '.pdf',
-                'date_signature' => now(),
-                'statut_signature' => 'signe',
-            ]);
-        }
-
         // Notification envoyée au gestionnaire (RF-61)
         Notification::create([
             'user_id' => $logement->admin_id,
@@ -130,8 +120,16 @@ class ReservationController extends Controller
     // RF-25 : Liste des réservations du locataire connecté
     public function mesReservations(Request $request)
     {
+        $user = $request->user();
         $reservations = Reservation::with(['logement.photos', 'logement.admin', 'locataire', 'paiements', 'contrat'])
-            ->where('locataire_id', $request->user()->id)
+            ->where(function ($q) use ($user) {
+                $q->where('locataire_id', $user->id);
+                if (!empty($user->email)) {
+                    $q->orWhereHas('locataire', function ($sub) use ($user) {
+                        $sub->where('email', $user->email);
+                    });
+                }
+            })
             ->orderBy('id', 'desc')
             ->get();
 
@@ -141,13 +139,24 @@ class ReservationController extends Controller
     // RF-43 : Liste des réservations pour le gestionnaire admin
     public function reservationsGestionnaire(Request $request)
     {
-        $adminId = $request->user()->id;
-        $reservations = Reservation::with(['logement', 'locataire', 'paiements', 'contrat'])
-            ->whereHas('logement', function ($q) use ($adminId) {
+        $user = $request->user();
+        $adminId = $user->id;
+        $isSuperAdmin = ($user->role === 'superadmin');
+
+        $query = Reservation::with(['logement.photos', 'logement.admin', 'locataire', 'paiements', 'contrat']);
+
+        if (!$isSuperAdmin) {
+            $query->whereHas('logement', function ($q) use ($adminId, $user) {
                 $q->where('admin_id', $adminId);
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                if (!empty($user->email)) {
+                    $q->orWhereHas('admin', function ($sub) use ($user) {
+                        $sub->where('email', $user->email);
+                    });
+                }
+            });
+        }
+
+        $reservations = $query->orderBy('id', 'desc')->get();
 
         return response()->json($reservations);
     }

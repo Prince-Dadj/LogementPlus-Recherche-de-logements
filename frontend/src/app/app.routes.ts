@@ -9,9 +9,13 @@ import { SuperAdminDashboardComponent } from './components/superadmin-dashboard/
 import { AdminLoginComponent } from './components/admin-login/admin-login.component';
 import { LoginComponent } from './components/login/login.component';
 import { ContactComponent } from './components/contact/contact.component';
+import { AboutComponent } from './components/about/about.component';
+import { AboutDetailsComponent } from './components/about-details/about-details.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
+  { path: 'about', component: AboutComponent },
+  { path: 'about/details', component: AboutDetailsComponent },
   { path: 'logements', component: LogementListComponent },
   { path: 'logements/:id', component: LogementDetailComponent },
   { path: 'logements/:id/reserver', component: ReservationFlowComponent },
