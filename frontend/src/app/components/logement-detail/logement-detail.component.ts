@@ -246,7 +246,7 @@ declare let L: any;
 
               <div class="mt-2 d-flex align-items-center justify-content-between flex-wrap gap-2 text-muted small" style="font-size: 11px;">
                 <span><i class="bi bi-info-circle me-1 text-primary"></i>Emplacement vérifié et géoréférencé avec précision sur la carte.</span>
-                <span class="text-success fw-medium"><i class="bi bi-shield-check me-1"></i>Adresse certifiée LogementPlus Sénégal</span>
+                <span class="text-success fw-medium"><i class="bi bi-shield-check me-1"></i>Adresse certifiée SanarHousings Sénégal</span>
               </div>
             </div>
 
@@ -453,7 +453,7 @@ declare let L: any;
               <div class="p-2 mb-3 rounded-3" style="background: rgba(20, 184, 166, 0.08); border: 1px solid rgba(20, 184, 166, 0.3);">
                 <div class="d-flex align-items-center gap-1 text-success fw-bold small mb-1" style="font-size: 11px;">
                   <i class="bi bi-shield-lock-fill fs-6"></i>
-                  <span>Garantie Séquestre 24h LogementPlus</span>
+                  <span>Garantie Séquestre 24h SanarHousings</span>
                 </div>
                 <small class="text-muted d-block" style="font-size: 10px; line-height: 1.4;">
                   Vos fonds sont bloqués et ne sont versés au propriétaire que <strong>24h après la remise des clés</strong> et validation de l'état des lieux. Zéro risque d'arnaque.
@@ -546,7 +546,7 @@ declare let L: any;
                 </div>
               </div>
 
-              <!-- Garanties LogementPlus incluses -->
+              <!-- Garanties SanarHousings incluses -->
               <div class="border-top pt-2">
                 <ul class="list-unstyled small text-muted mb-0" style="font-size: 11px;">
                   <li class="mb-1"><i class="bi bi-check2-circle text-success me-1"></i>Fonds 100% remboursés si non-conformité constatée</li>
@@ -593,7 +593,7 @@ declare let L: any;
         </div>
       }
 
-      <!-- Modale "Poser une question au propriétaire" (Style Messagerie LogementPlus) -->
+      <!-- Modale "Poser une question au propriétaire" (Style Messagerie SanarHousings) -->
       @if (showQuestionModal) {
         <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5); z-index: 1050;">
           <div class="modal-dialog modal-dialog-centered">
@@ -664,7 +664,7 @@ export class LogementDetailComponent implements OnInit, OnDestroy, AfterViewInit
   private detailMap: any = null;
   private detailMarker: any = null;
 
-  // Modale LogementPlus "Poser une question"
+  // Modale SanarHousings "Poser une question"
   showQuestionModal = false;
   questionSent = false;
   visitorName = '';
@@ -838,7 +838,7 @@ export class LogementDetailComponent implements OnInit, OnDestroy, AfterViewInit
   getDirectWhatsAppUrl(): string {
     if (!this.logement) return 'https://wa.me/221770000000';
     const text = encodeURIComponent(
-      `Bonjour, je vous contacte depuis LogementPlus Sénégal au sujet de l'annonce Réf #${this.logement.id} : "${this.logement.titre}" à ${this.logement.quartier || this.logement.ville} (${this.logement.prix_par_mois.toLocaleString('fr-FR')} FCFA/mois).`
+      `Bonjour, je vous contacte depuis SanarHousings Sénégal au sujet de l'annonce Réf #${this.logement.id} : "${this.logement.titre}" à ${this.logement.quartier || this.logement.ville} (${this.logement.prix_par_mois.toLocaleString('fr-FR')} FCFA/mois).`
     );
     return `https://wa.me/${this.logement.admin?.telephone}?text=${text}`;
   }

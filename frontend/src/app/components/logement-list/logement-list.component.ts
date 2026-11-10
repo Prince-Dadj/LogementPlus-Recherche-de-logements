@@ -48,7 +48,7 @@ declare let L: any;
             <i class="bi bi-sliders2"></i>
             <span class="fw-semibold small">Filtres</span>
             @if (activeFiltersCount > 0) {
-              <span class="badge bg-white text-primary rounded-pill px-1-5 py-0 fw-bold" style="font-size: 10px;">
+              <span class="badge bg-white text-primary rounded-2 px-1-5 py-0 fw-bold" style="font-size: 10px;">
                 {{ activeFiltersCount }}
               </span>
             }
@@ -350,7 +350,7 @@ declare let L: any;
                 <div class="d-flex align-items-center justify-content-between mb-1">
                   <label class="form-label small fw-semibold text-dark mb-0">Équipements indispensables</label>
                   @if (selectedEquipements.size > 0) {
-                    <span class="badge bg-primary rounded-pill small" style="font-size: 10px;">{{ selectedEquipements.size }}</span>
+                    <span class="badge bg-primary rounded-2 small" style="font-size: 10px;">{{ selectedEquipements.size }}</span>
                   }
                 </div>
                 <div class="d-flex flex-wrap gap-1" style="max-height: 160px; overflow-y: auto;">
@@ -893,7 +893,7 @@ declare let L: any;
                 <div class="d-flex align-items-center justify-content-between mb-2">
                   <label class="form-label small fw-semibold text-dark mb-0">Équipements indispensables</label>
                   @if (tempSelectedEquipements.size > 0) {
-                    <span class="badge bg-primary rounded-pill small">{{ tempSelectedEquipements.size }}</span>
+                    <span class="badge bg-primary rounded-2 small">{{ tempSelectedEquipements.size }}</span>
                   }
                 </div>
                 <div class="d-flex flex-wrap gap-1">

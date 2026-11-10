@@ -47,7 +47,7 @@ interface ManagerContact {
             <h2 class="h5 fw-bold mb-1 text-dark">
               <i class="bi bi-shield-check text-primary me-2"></i>Gestionnaires Immobiliers Agréés (Sénégal)
             </h2>
-            <p class="text-muted small mb-0">Professionnels certifiés gérant le parc immobilier sur LogementPlus Sénégal</p>
+            <p class="text-muted small mb-0">Professionnels certifiés gérant le parc immobilier sur SanarHousings Sénégal</p>
           </div>
           <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1 rounded-2 small">
             <i class="bi bi-check-circle-fill me-1"></i> Gestionnaires certifiés au Sénégal
@@ -138,7 +138,7 @@ interface ManagerContact {
           </div>
         }
 
-        <!-- Carte 4 : Assistance & Support Central LogementPlus Sénégal -->
+        <!-- Carte 4 : Assistance & Support Central SanarHousings Sénégal -->
         <div class="col-md-6 col-lg-4">
           <div class="manager-card h-100 p-3 d-flex flex-column justify-content-between" style="border: 2px dashed #14B8A6; background: #FAFDFD;">
             <div>
@@ -152,7 +152,7 @@ interface ManagerContact {
                     <span class="badge bg-success small" style="font-size: 11px;">24h / 7j</span>
                   </div>
                   <div class="text-muted small">Service Client Sénégal</div>
-                  <div class="text-primary fw-semibold small" style="font-size: 12px;">LogementPlus Sénégal</div>
+                  <div class="text-primary fw-semibold small" style="font-size: 12px;">SanarHousings Sénégal</div>
                 </div>
               </div>
 
@@ -161,7 +161,7 @@ interface ManagerContact {
                   Assistance pour paiements Wave & Orange Money Sénégal, contrats de baux et accompagnement aux visites à Dakar et Saly.
                 </p>
                 <div class="small text-dark mb-1" style="font-size: 12px;">
-                  <i class="bi bi-envelope-at text-primary me-1"></i><strong>Email :</strong> support&#64;logementplus.sn
+                  <i class="bi bi-envelope-at text-primary me-1"></i><strong>Email :</strong> support&#64;sanarhousings.sn
                 </div>
                 <div class="small text-dark" style="font-size: 12px;">
                   <i class="bi bi-geo-alt-fill text-danger me-1"></i><strong>Siège :</strong> Avenue Léopold S. Senghor, Dakar Plateau, Sénégal
@@ -172,7 +172,7 @@ interface ManagerContact {
             <div>
               <div class="d-grid gap-2">
                 <a 
-                  href="https://wa.me/221770000000?text=Bonjour%20Support%20LogementPlus%20S%C3%A9n%C3%A9gal%2C%20j%27ai%20besoin%20d%27assistance." 
+                  href="https://wa.me/221770000000?text=Bonjour%20Support%20SanarHousings%20S%C3%A9n%C3%A9gal%2C%20j%27ai%20besoin%20d%27assistance." 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   class="btn btn-whatsapp d-flex align-items-center justify-content-center gap-2 py-2">
@@ -188,7 +188,7 @@ interface ManagerContact {
                     </a>
                   </div>
                   <div class="col-6">
-                    <a href="sms:+221770000000?body=Bonjour%20Support%20LogementPlus%20Senegal" class="btn btn-sms w-100 py-1 d-flex align-items-center justify-content-center gap-1 small">
+                    <a href="sms:+221770000000?body=Bonjour%20Support%20SanarHousings%20Senegal" class="btn btn-sms w-100 py-1 d-flex align-items-center justify-content-center gap-1 small">
                       <i class="bi bi-chat-dots-fill"></i>
                       <span>SMS</span>
                     </a>
@@ -338,14 +338,14 @@ export class ContactComponent implements OnInit {
 
   getWhatsAppUrl(mgr: ManagerContact): string {
     const text = encodeURIComponent(
-      `Bonjour M./Mme ${mgr.name}, je vous contacte depuis la plateforme LogementPlus Sénégal concernant la réservation ou la visite d'un logement.`
+      `Bonjour M./Mme ${mgr.name}, je vous contacte depuis la plateforme SanarHousings Sénégal concernant la réservation ou la visite d'un logement.`
     );
     return `https://wa.me/${mgr.whatsappRaw}?text=${text}`;
   }
 
   getSmsUrl(mgr: ManagerContact): string {
     const body = encodeURIComponent(
-      `Bonjour ${mgr.name}, je souhaite des informations concernant un logement sur LogementPlus Sénégal.`
+      `Bonjour ${mgr.name}, je souhaite des informations concernant un logement sur SanarHousings Sénégal.`
     );
     return `sms:${mgr.phoneRaw}?body=${body}`;
   }

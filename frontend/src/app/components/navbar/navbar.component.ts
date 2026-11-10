@@ -10,15 +10,20 @@ import { AuthService } from '../../services/auth.service';
   template: `
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-2 app-navbar">
       <div class="container-fluid px-lg-4">
-        <!-- Logo CDC 8.4 : Maison stylisée dont le toit forme un repère pin -->
+        <!-- Logo Officiel SanarHousings : Écusson architectural moderne -->
         <a class="navbar-brand d-flex align-items-center gap-2 py-0" routerLink="/">
-          <span class="d-inline-flex align-items-center justify-content-center bg-white text-primary rounded-circle shadow-sm" style="width: 34px; height: 34px; color: #0B3D91 !important;">
-            <i class="bi bi-geo-alt-fill fs-6" style="transform: translateY(-1px);"></i>
+          <span class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm" style="width: 36px; height: 36px; padding: 6px;">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 3L3 13.5L5.5 15.5L16 7L26.5 15.5L29 13.5L16 3Z" fill="#14B8A6"/>
+              <path d="M22 6H25V11.2L22 8.8V6Z" fill="#0D9488"/>
+              <path d="M6 14V27C6 28.1 6.9 29 8 29H24C25.1 29 26 28.1 26 27V14L16 6L6 14Z" fill="#0B3D91"/>
+              <path d="M13 29V20C13 18.34 14.34 17 16 17C17.66 17 19 18.34 19 20V29H13Z" fill="#FFFFFF"/>
+              <circle cx="16" cy="12" r="2.2" fill="#F59E0B"/>
+            </svg>
           </span>
           <span class="fw-bold tracking-tight text-white fs-5" style="font-family: 'Poppins', sans-serif;">
-            Logement<span style="color: #14B8A6;">Plus</span>
+            Sanar<span style="color: #14B8A6;">Housings</span>
           </span>
-          
         </a>
 
         <!-- Bouton mobile toggle -->

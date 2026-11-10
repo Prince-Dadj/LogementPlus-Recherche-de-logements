@@ -665,7 +665,7 @@ Chart.register(...registerables);
                                alt="Avatar">
                           <div class="flex-grow-1 min-w-0">
                             <div class="d-flex align-items-center justify-content-between mb-1">
-                              <strong class="text-dark small text-truncate d-block" style="max-width: 150px;">
+                              <strong class="text-dark small text-truncate d-block" style="max-width: 150px !important;">
                                 {{ conv.interlocuteur.name }}
                               </strong>
                               <span class="text-muted" style="font-size: 10px;">{{ messageService.getRelativeTime(conv.dateDernierMessage) }}</span>
@@ -675,7 +675,7 @@ Chart.register(...registerables);
                                 {{ conv.logement_titre }}
                               </span>
                             }
-                            <p class="text-muted small text-truncate mb-0" style="font-size: 11px;">
+                            <p class="text-muted small text-truncate mb-0" style="font-size: 11px;max-width: 150px;">
                               {{ conv.dernierMessage }}
                             </p>
                           </div>
@@ -692,12 +692,13 @@ Chart.register(...registerables);
                 <div class="col-lg-8 d-flex flex-column" [class.d-none]="!mobileShowConversation" [class.d-lg-flex]="true">
                   @if (activeConversation) {
                     <!-- Entête conversation -->
-                    <div class="p-3 border-bottom bg-white d-flex align-items-center justify-content-between flex-wrap gap-2">
-                      <div class="d-flex align-items-center gap-2">
-                        <!-- Bouton retour sur mobile -->
-                        <button class="btn btn-sm btn-light border d-lg-none" type="button" (click)="retourListeConversations()" title="Retour à la liste">
-                          <i class="bi bi-chevron-left me-1"></i> Messages
+                    <div class="p-3 border-bottom bg-white d-block flex-wrap gap-2">
+                      <button class="btn btn-sm btn-light border d-lg-none mb-3" type="button" (click)="retourListeConversations()" title="Retour à la liste">
+                          <i class="bi bi-chevron-left me-1"></i> Retour
                         </button>
+                      <div class="d-flex align-items-center gap-2 mb-3">
+                        <!-- Bouton retour sur mobile -->
+                        
                         <img [src]="activeConversation.interlocuteur.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80'" 
                              class="rounded-circle object-fit-cover shadow-sm" 
                              style="width: 44px; height: 44px;" 
@@ -791,7 +792,7 @@ Chart.register(...registerables);
                   <h2 class="h5 fw-bold mb-1 text-dark d-flex align-items-center gap-2">
                     <i class="bi bi-buildings text-primary"></i> Gestion des Agences Partenaires
                   </h2>
-                  <p class="text-muted small mb-0">Enregistrez, certifiez et administrez les agences immobilières partenaires de LogementPlus.</p>
+                  <p class="text-muted small mb-0">Enregistrez, certifiez et administrez les agences immobilières partenaires de SanarHousings.</p>
                 </div>
                 <button class="btn btn-primary rounded-2 px-4 fw-semibold shadow-sm d-flex align-items-center gap-2" (click)="ouvrirAddAgenceModal()">
                   <i class="bi bi-plus-circle-fill"></i>

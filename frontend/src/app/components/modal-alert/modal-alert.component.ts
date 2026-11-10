@@ -26,7 +26,7 @@ import { AuthService } from '../../services/auth.service';
                       <i class="bi bi-shield-check text-success me-1"></i> RÉPUBLIQUE DU SÉNÉGAL
                     </span>
                     <h5 class="fw-bold mb-1 text-white">REÇU OFFICIEL DE SÉQUESTRE & PAIEMENT</h5>
-                    <p class="small text-white-50 mb-0">Plateforme Immobilière Certifiée • LogementPlus Sénégal</p>
+                    <p class="small text-white-50 mb-0">Plateforme Immobilière Certifiée • SanarHousings Sénégal</p>
                   </div>
                   <div class="text-end">
                     <span class="badge bg-success bg-opacity-25 border border-success text-white px-3 py-2 fs-6">
@@ -41,7 +41,7 @@ import { AuthService } from '../../services/auth.service';
                       <i class="bi bi-shield-check text-success me-1"></i> RÉPUBLIQUE DU SÉNÉGAL
                     </span>
                     <h5 class="fw-bold mb-1 text-white">REÇU OFFICIEL DE SÉQUESTRE & PAIEMENT</h5>
-                    <p class="small text-white-50 mb-0">Plateforme Immobilière Certifiée • LogementPlus Sénégal</p>
+                    <p class="small text-white-50 mb-0">Plateforme Immobilière Certifiée • SanarHousings Sénégal</p>
                   </div>
                   <div class="text-start">
                     <span class="badge bg-success bg-opacity-25 border border-success text-white px-3 py-2 fs-6">
@@ -176,7 +176,7 @@ import { AuthService } from '../../services/auth.service';
 
                 <div class="mb-3">
                   <h6 class="fw-bold text-dark border-bottom pb-1 small text-uppercase">1. Désignation des Parties</h6>
-                  <p class="small mb-1"><strong>Bailleur / Gestionnaire :</strong> {{ state.reservation?.logement?.admin?.name || 'Gestionnaire Agréé' }} ({{ state.reservation?.logement?.admin?.raison_sociale || 'Agence Partenaire LogementPlus' }})</p>
+                  <p class="small mb-1"><strong>Bailleur / Gestionnaire :</strong> {{ state.reservation?.logement?.admin?.name || 'Gestionnaire Agréé' }} ({{ state.reservation?.logement?.admin?.raison_sociale || 'Agence Partenaire SanarHousings' }})</p>
                   <p class="small mb-1">
                     <strong>Preneur / Locataire :</strong> {{ locataireName }}
                     <span class="text-muted ms-1">({{ locataireEmail }} • {{ locataireTelephone }})</span>
@@ -194,7 +194,7 @@ import { AuthService } from '../../services/auth.service';
                   <h6 class="fw-bold text-dark border-bottom pb-1 small text-uppercase">3. Conditions Financières & Caution Réglementée</h6>
                   <p class="small mb-1"><strong>Loyer mensuel :</strong> {{ (state.reservation?.montant_loyer || 0).toLocaleString('fr-FR') }} FCFA</p>
                   <p class="small mb-1"><strong>Dépôt de garantie (Caution) :</strong> {{ (state.reservation?.montant_caution || 0).toLocaleString('fr-FR') }} FCFA (Strictement plafonné à 2 mois maximum conforme COCC).</p>
-                  <p class="small mb-1"><strong>Séquestre :</strong> Fonds sécurisés par LogementPlus jusqu'à constat d'entrée des lieux contradictoire.</p>
+                  <p class="small mb-1"><strong>Séquestre :</strong> Fonds sécurisés par SanarHousings jusqu'à constat d'entrée des lieux contradictoire.</p>
                 </div>
 
                 <div class="mb-3">
@@ -205,14 +205,14 @@ import { AuthService } from '../../services/auth.service';
                 <div class="p-3 bg-light rounded-3 border d-lg-flex d-none justify-content-between align-items-center mt-3">
                   <div>
                     <div class="small fw-bold text-success"><i class="bi bi-shield-lock-fill me-1"></i> Signature Électronique Horodatée</div>
-                    <div class="small text-muted" style="font-size: 11px;">Authentification certifiée par plateforme LogementPlus Sénégal</div>
+                    <div class="small text-muted" style="font-size: 11px;">Authentification certifiée par plateforme SanarHousings Sénégal</div>
                   </div>
                   <span class="badge bg-success">VALIDE & ENREGISTRÉ</span>
                 </div>
                 <div class="p-3 bg-light rounded-3 border d-block d-lg-none align-items-center mt-3">
                   <div class="mb-3">
                     <div class="small fw-bold text-success"><i class="bi bi-shield-lock-fill me-1"></i> Signature Électronique Horodatée</div>
-                    <div class="small text-muted" style="font-size: 11px;">Authentification certifiée par plateforme LogementPlus Sénégal</div>
+                    <div class="small text-muted" style="font-size: 11px;">Authentification certifiée par plateforme SanarHousings Sénégal</div>
                   </div>
                   <span class="badge bg-success">VALIDE & ENREGISTRÉ</span>
                 </div>

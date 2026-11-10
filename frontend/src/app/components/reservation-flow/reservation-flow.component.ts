@@ -368,7 +368,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                   <div class="p-2 mb-3 rounded-3 bg-light border border-success border-opacity-25 d-flex align-items-center gap-2">
                     <i class="bi bi-shield-check fs-4 text-success flex-shrink-0"></i>
                     <div>
-                      <strong class="d-block small text-dark">Garantie Séquestre 24h LogementPlus</strong>
+                      <strong class="d-block small text-dark">Garantie Séquestre 24h SanarHousings</strong>
                       <small class="text-muted" style="font-size: 11px;">Vos fonds sont sécurisés sous séquestre tiers certifié. Le bailleur n'est crédité que 24h après votre remise des clés et confirmation de conformité.</small>
                     </div>
                   </div>
@@ -607,14 +607,14 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                 <h6 class="fw-bold text-dark border-bottom pb-1">ARTICLE 1 : DÉSIGNATION DES PARTIES</h6>
                 <p>
                   <strong>LE BAILLEUR (ou son représentant agréé) :</strong><br>
-                  {{ logement?.admin?.raison_sociale || logement?.admin?.name || 'Gestionnaire Mandataire Partenaire LogementPlus' }}<br>
+                  {{ logement?.admin?.raison_sociale || logement?.admin?.name || 'Gestionnaire Mandataire Partenaire SanarHousings' }}<br>
                   Dakar, Sénégal • Téléphone : +221 77 080 91 10 • Immatriculation RCCM SN.DKR
                 </p>
                 <p>
                   <strong>LE PRENEUR (Le Locataire) :</strong><br>
                   {{ auth.currentUser()?.name || 'Locataire certifié' }}<br>
                   Email : {{ auth.currentUser()?.email }} • Téléphone : {{ auth.currentUser()?.telephone || '+221 77 123 45 67' }}<br>
-                  Dossier locataire certifié conforme LogementPlus (Pièce d'identité et justificatifs de revenus validés).
+                  Dossier locataire certifié conforme SanarHousings (Pièce d'identité et justificatifs de revenus validés).
                 </p>
 
                 <h6 class="fw-bold text-dark border-bottom pb-1 mt-3">ARTICLE 2 : DÉSIGNATION DES LIEUX LOUÉS</h6>
@@ -634,7 +634,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                 <p>
                   • <strong>Loyer :</strong> Le loyer mensuel est fixé à <strong>{{ (calcul?.montant_loyer || logement?.prix_par_mois) | number }} FCFA</strong>.<br>
                   • <strong>Dépôt de garantie (Caution) :</strong> Fixé à <strong>{{ (calcul?.montant_caution || logement?.caution) | number }} FCFA</strong>. Conformément à la législation sénégalaise en vigueur, la caution ne peut excéder deux (2) mois de loyer.<br>
-                  • <strong>Garantie Séquestre LogementPlus :</strong> L'intégralité des sommes versées est consignée sous séquestre tiers agréé. Le bailleur n'est crédité que 24 heures après l'entrée dans les lieux et la confirmation contradictoire de la conformité du logement.
+                  • <strong>Garantie Séquestre SanarHousings :</strong> L'intégralité des sommes versées est consignée sous séquestre tiers agréé. Le bailleur n'est crédité que 24 heures après l'entrée dans les lieux et la confirmation contradictoire de la conformité du logement.
                 </p>
 
                 <h6 class="fw-bold text-dark border-bottom pb-1 mt-3">ARTICLE 5 : ÉTAT DES LIEUX & OBLIGATIONS</h6>
@@ -644,7 +644,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
 
                 <h6 class="fw-bold text-dark border-bottom pb-1 mt-3">ARTICLE 6 : RÉSILIATION ET CONTENTIEUX</h6>
                 <p class="mb-0">
-                  En cas de litige, les parties conviennent de recourir en priorité au service de conciliation LogementPlus Sénégal. À défaut d'accord amiable, compétence expresse est attribuée au Tribunal de Grande Instance compétent de Dakar ou Mbour.
+                  En cas de litige, les parties conviennent de recourir en priorité au service de conciliation SanarHousings Sénégal. À défaut d'accord amiable, compétence expresse est attribuée au Tribunal de Grande Instance compétent de Dakar ou Mbour.
                 </p>
               </div>
 
@@ -682,7 +682,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                   <!-- En-tête officiel -->
                   <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
                     <div>
-                      <h4 class="fw-bold text-primary mb-1">LOGEMENTPLUS SÉNÉGAL</h4>
+                      <h4 class="fw-bold text-primary mb-1">SANARHOUSINGS SÉNÉGAL</h4>
                       <small class="text-muted d-block">Plateforme Immobilière Certifiée • Dakar, Sénégal</small>
                       <small class="text-muted">Agrément Séquestre Tiers n° SN-CDP-2026/04</small>
                     </div>
@@ -728,7 +728,7 @@ import { Logement, Reservation, ReservationCalculation } from '../../models/mode
                           <td class="text-end tabular-numbers">{{ (calcul?.montant_caution || logement?.caution) | number }} FCFA</td>
                         </tr>
                         <tr>
-                          <td>Frais de sécurisation & Contrat numérique LogementPlus</td>
+                          <td>Frais de sécurisation & Contrat numérique SanarHousings</td>
                           <td>Plateforme</td>
                           <td class="text-end tabular-numbers">{{ (calcul?.montant_frais_service || logement?.frais_service) | number }} FCFA</td>
                         </tr>

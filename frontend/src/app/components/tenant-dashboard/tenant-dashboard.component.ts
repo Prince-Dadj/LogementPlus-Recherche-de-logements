@@ -276,7 +276,7 @@ import { Subscription } from 'rxjs';
               <i class="bi bi-calendar-check me-2 text-primary"></i> Mes réservations & Statut du Séquestre
             </h2>
             <span class="badge bg-light text-dark border rounded-2 small" style="font-size: 11px;">
-              Garantie Séquestre LogementPlus active
+              Garantie Séquestre SanarHousings active
             </span>
           </div>
 
@@ -583,7 +583,7 @@ import { Subscription } from 'rxjs';
                           }
                         </div>
 
-                        <p class="text-muted small text-truncate mb-0" style="font-size: 12px; max-width: 250px;">
+                        <p class="text-muted small text-truncate mb-0" style="font-size: 12px; max-width: 150px;">
                           {{ conv.dernierMessage }}
                         </p>
                       </div>
@@ -650,7 +650,7 @@ import { Subscription } from 'rxjs';
                   <div class="text-center mb-3">
                     <span class="badge bg-white text-muted border px-3 py-2 rounded-2 shadow-sm text-wrap" style="font-size: 11px; line-height: 1.4;">
                       <i class="bi bi-shield-lock-fill text-success me-1"></i>
-                      Échanges cryptés conformes CDP Sénégal (Loi 2008-12) & Séquestre LogementPlus
+                      Échanges cryptés conformes CDP Sénégal (Loi 2008-12) & Séquestre SanarHousings
                     </span>
                   </div>
 
@@ -725,7 +725,7 @@ import { Subscription } from 'rxjs';
                   </div>
                   <h3 class="h5 fw-bold text-dark mb-1">Sélectionnez une conversation</h3>
                   <p class="small text-muted" style="max-width: 320px;">
-                    Discutez en direct avec vos gestionnaires de biens et le support officiel LogementPlus Sénégal.
+                    Discutez en direct avec vos gestionnaires de biens et le support officiel SanarHousings Sénégal.
                   </p>
                 </div>
               }
@@ -1063,7 +1063,7 @@ import { Subscription } from 'rxjs';
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                   <div>
                     <span class="fw-bold text-dark d-block small">
-                      <i class="bi bi-shield-lock-fill text-primary me-1"></i> Moteur d'Audit Anti-Fraude LogementPlus
+                      <i class="bi bi-shield-lock-fill text-primary me-1"></i> Moteur d'Audit Anti-Fraude SanarHousings
                     </span>
                     <small class="text-muted" style="font-size: 11px;">
                       Les captures d'écran web ou images non régaliennes sont automatiquement rejetées.
@@ -1200,7 +1200,7 @@ import { Subscription } from 'rxjs';
                   <span class="badge bg-success small">Séquestre Wave/OM Activé ✓</span>
                 </div>
                 <select class="form-select form-select-sm" [(ngModel)]="garantieType" name="garantieType">
-                  <option value="sequestre_wave">Garantie Séquestre LogementPlus 24h (Paiement Wave / Orange Money)</option>
+                  <option value="sequestre_wave">Garantie Séquestre SanarHousings 24h (Paiement Wave / Orange Money)</option>
                   <option value="caution_bloquee">Caution bancaire bloquée (2 mois de loyer max selon la loi sénégalaise)</option>
                   <option value="garant_physique">Garant personne physique solvable résidant au Sénégal</option>
                 </select>

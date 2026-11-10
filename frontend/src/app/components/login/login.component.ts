@@ -22,7 +22,7 @@ import { AuthService } from '../../services/auth.service';
               <i class="bi bi-geo-alt-fill fs-5"></i>
             </span>
             <span class="fw-bold tracking-tight text-white fs-4" style="font-family: 'Poppins', sans-serif;">
-              Logement<span style="color: #14B8A6;">Plus</span>
+              Sanar<span style="color: #14B8A6;">Housings</span>
             </span>
           </a>
           <p class="text-white-50 small mb-0">Portail officiel d'accès et d'inscription</p>

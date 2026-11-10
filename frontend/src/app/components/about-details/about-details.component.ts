@@ -1,6 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { StatsService } from '../../services/stats.service';
+import { AgenceService } from '../../services/agence.service';
+import { PlateformePublicStats, Agence } from '../../models/models';
 
 interface FaqItem {
   question: string;
@@ -49,13 +53,13 @@ interface FaqItem {
                 <i class="bi bi-building me-1"></i> Plateforme Numérique Immobilière
               </span> -->
               <h1 class="display-5 fw-bold mb-3 text-secondary" style="font-family: 'Poppins', sans-serif;">
-                À propos de LogementPlus
+                À propos de <span class="text-white">Sanar</span> <span style="color: #2DD4BF;">Housings</span>
               </h1>
               <p class="lead text-teal-light fw-semibold mb-3">
                 Une plateforme numérique pensée pour simplifier l'expérience du logement.
               </p>
               <p class="text-white-50 mb-4 fs-6" style="line-height: 1.7; max-width: 620px;">
-                LogementPlus accompagne les utilisateurs dans leur recherche de logement et facilite les interactions entre locataires, propriétaires et gestionnaires.
+                SanarHousings accompagne les utilisateurs dans leur recherche de logement et facilite les interactions entre locataires, propriétaires et gestionnaires.
               </p>
 
               <div class="d-flex flex-wrap gap-3">
@@ -76,7 +80,7 @@ interface FaqItem {
                 <div class="image-wrapper rounded-3 overflow-hidden position-relative mb-3">
                   <img 
                     src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80" 
-                    alt="Architecture moderne LogementPlus" 
+                    alt="Architecture moderne SanarHousings" 
                     class="img-fluid object-fit-cover w-100" 
                     style="height: 230px;"
                   >
@@ -86,7 +90,7 @@ interface FaqItem {
                 </div>
                 <div class="d-flex justify-content-between align-items-center text-start">
                   <div>
-                    <h2 class="h6 fw-bold mb-0 text-dark">LogementPlus</h2>
+                    <h2 class="h6 fw-bold mb-0 text-dark">SanarHousings</h2>
                     <small class="text-muted">Espace moderne & accessible</small>
                   </div>
                   <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-2 px-2 py-1 small">
@@ -114,13 +118,13 @@ interface FaqItem {
                       <span class="d-inline-block rounded-circle bg-danger" style="width: 10px; height: 10px;"></span>
                       <span class="d-inline-block rounded-circle bg-warning" style="width: 10px; height: 10px;"></span>
                       <span class="d-inline-block rounded-circle bg-success" style="width: 10px; height: 10px;"></span>
-                      <span class="small fw-semibold ms-2 text-dark font-monospace" style="font-size: 11px;">logementplus.sn</span>
+                      <span class="small fw-semibold ms-2 text-dark font-monospace" style="font-size: 11px;">sanarhousings.sn</span>
                     </div>
                     <span class="badge bg-primary bg-opacity-10 text-primary small rounded-pill">Catalogue & Gestion</span>
                   </div>
                   <img 
                     src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80" 
-                    alt="Espace LogementPlus" 
+                    alt="Espace SanarHousings" 
                     class="img-fluid object-fit-cover" 
                     style="height: 280px;"
                   >
@@ -144,13 +148,13 @@ interface FaqItem {
               </h2>
               <div class="lead-text mb-4 text-muted" style="line-height: 1.8;">
                 <p class="mb-3">
-                  <strong>LogementPlus</strong> est une plateforme numérique dédiée à la recherche, à la réservation et à la gestion des logements.
+                  <strong>SanarHousings</strong> est une plateforme numérique dédiée à la recherche, à la réservation et à la gestion des logements.
                 </p>
                 <p class="mb-3">
                   Conçue pour répondre aux attentes d'un marché en pleine évolution, la plateforme cherche à <strong>centraliser les informations essentielles</strong> et à <strong>faciliter les échanges</strong> entre les différents acteurs : locataires en quête d'un bien, propriétaires et gestionnaires immobiliers.
                 </p>
                 <p class="mb-0">
-                  En intégrant les outils de consultation, de soumission de demande et de suivi au sein d'un même environnement, LogementPlus offre une expérience transparente, organisée et accessible depuis n'importe quel terminal.
+                  En intégrant les outils de consultation, de soumission de demande et de suivi au sein d'un même environnement, SanarHousings offre une expérience transparente, organisée et accessible depuis n'importe quel terminal.
                 </p>
               </div>
 
@@ -358,7 +362,7 @@ interface FaqItem {
               Nos valeurs
             </h2>
             <p class="text-muted small mb-0">
-              Cinq piliers essentiels guident la conception et l'évolution quotidienne de LogementPlus.
+              Cinq piliers essentiels guident la conception et l'évolution quotidienne de SanarHousings.
             </p>
           </div>
 
@@ -548,7 +552,7 @@ interface FaqItem {
 
                 <div class="text-muted small" style="line-height: 1.7;">
                   <p class="mb-2">
-                    Dans l'organisation actuelle de LogementPlus, les propriétaires confient la commercialisation et l'administration de leurs biens aux <strong>gestionnaires et agences agréés</strong>.
+                    Dans l'organisation actuelle de SanarHousings, les propriétaires confient la commercialisation et l'administration de leurs biens aux <strong>gestionnaires et agences agréés</strong>.
                   </p>
                   <p class="mb-2">
                     Ces gestionnaires professionnels agissent en tant que mandataires : ils référencent les logements sur la plateforme, examinent les demandes des locataires et assurent la gestion opérationnelle.
@@ -576,7 +580,7 @@ interface FaqItem {
               Parcours utilisateur
             </span> -->
             <h2 class="h2 fw-bold text-dark mb-2" style="font-family: 'Poppins', sans-serif;">
-              Comment fonctionne LogementPlus ?
+              Comment fonctionne SanarHousings ?
             </h2>
             <p class="text-muted small mb-0">
               Un parcours clair et séquencé en 4 étapes simples.
@@ -644,7 +648,7 @@ interface FaqItem {
               Avantages concrets
             </span> -->
             <h2 class="h2 fw-bold text-dark mb-2" style="font-family: 'Poppins', sans-serif;">
-              Pourquoi choisir LogementPlus ?
+              Pourquoi choisir SanarHousings ?
             </h2>
             <p class="text-muted small mb-0">
               Des atouts vérifiables et immédiatement utiles pour vos démarches de logement.
@@ -747,7 +751,7 @@ interface FaqItem {
             </h2>
             <div class="mx-auto" style="max-width: 700px;">
               <p class="text-secondary lead fs-6 mb-0" style="line-height: 1.8;">
-                « LogementPlus s'inscrit dans une démarche d'amélioration continue. Notre objectif est de proposer une plateforme utile, simple à utiliser et capable d'évoluer en fonction des attentes des utilisateurs et des besoins du secteur immobilier. »
+                « SanarHousings s'inscrit dans une démarche d'amélioration continue. Notre objectif est de proposer une plateforme utile, simple à utiliser et capable d'évoluer en fonction des attentes des utilisateurs et des besoins du secteur immobilier. »
               </p>
             </div>
           </div>
@@ -755,13 +759,168 @@ interface FaqItem {
       </section> -->
 
       <!-- =================================================================== -->
-      <!-- SECTION 10 — QUESTIONS FRÉQUENTES (ACCORDÉON INTERACTIF)           -->
+      <!-- SECTION 9 — STATISTIQUES DE LA PLATEFORME (CHIFFRES CLÉS)          -->
+      <!-- =================================================================== -->
+      <section class="py-5 text-white position-relative overflow-hidden details-stats-section">
+        <div class="dsg-left"></div>
+        <div class="dsg-right"></div>
+        <div class="container position-relative py-lg-4" style="z-index:2;">
+          <div class="text-center max-w-700 mx-auto mb-5">
+            <!-- <span class="badge px-3 py-1 rounded-2 dsg-badge fw-semibold small mb-2 text-uppercase letter-spacing-1">
+              <i class="bi bi-graph-up-arrow me-1"></i> Impact & Performance
+            </span> -->
+            <h2 class="h2 fw-bold text-white mb-2" style="font-family:'Poppins',sans-serif;">
+              Sanar<span style="color:#2DD4BF">Housings</span> en Chiffres
+            </h2>
+            <p class="text-white-50 small mb-0">
+              Des données calculées en continu pour mesurer la fiabilité et l'activité de notre écosystème.
+            </p>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-6 col-lg-3">
+              <div class="dsg-metric-card h-100 p-4 rounded-4 text-center">
+                <div class="dsg-icon-wrap dsg-icon-amber mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle">
+                  <i class="bi bi-houses-fill fs-3"></i>
+                </div>
+                <div class="dsg-number tabular-numbers fw-bold mb-1" style="color:#F59E0B;">
+                  {{ stats?.nb_logements ?? 12 }}
+                </div>
+                <div class="h6 fw-semibold text-white mb-1">Logements vérifiés</div>
+                <small class="text-white-50" style="font-size:.8rem;">Biens répertoriés & audités</small>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="dsg-metric-card h-100 p-4 rounded-4 text-center">
+                <div class="dsg-icon-wrap dsg-icon-teal mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle">
+                  <i class="bi bi-buildings-fill fs-3"></i>
+                </div>
+                <div class="dsg-number tabular-numbers fw-bold mb-1" style="color:#2DD4BF;">
+                  {{ stats?.nb_agences ?? (agences.length || 4) }}
+                </div>
+                <div class="h6 fw-semibold text-white mb-1">Agences partenaires</div>
+                <small class="text-white-50" style="font-size:.8rem;">Professionnels certifiés</small>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="dsg-metric-card h-100 p-4 rounded-4 text-center">
+                <div class="dsg-icon-wrap dsg-icon-blue mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle">
+                  <i class="bi bi-people-fill fs-3"></i>
+                </div>
+                <div class="dsg-number tabular-numbers fw-bold mb-1" style="color:#38BDF8;">
+                  {{ stats?.nb_locataires ?? 48 }}
+                </div>
+                <div class="h6 fw-semibold text-white mb-1">Locataires accompagnés</div>
+                <small class="text-white-50" style="font-size:.8rem;">Dossiers & baux facilités</small>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="dsg-metric-card h-100 p-4 rounded-4 text-center">
+                <div class="dsg-icon-wrap dsg-icon-green mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle">
+                  <i class="bi bi-star-fill fs-3"></i>
+                </div>
+                <div class="dsg-number tabular-numbers fw-bold mb-1" style="color:#34D399;">
+                  {{ stats?.taux_satisfaction ?? 98 }}%
+                </div>
+                <div class="h6 fw-semibold text-white mb-1">Satisfaction globale</div>
+                <small class="text-white-50" style="font-size:.8rem;">
+                  Note : {{ stats?.note_moyenne ?? 4.9 }}/5
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SECTION 10 — AGENCES PARTENAIRES AVEC MARQUEE AUTOMATIQUE           -->
+      <!-- =================================================================== -->
+      @if (agences && agences.length > 0) {
+        <section class="py-5 bg-white border-top border-bottom position-relative overflow-hidden">
+          <div class="container mb-4">
+            <div class="row align-items-center g-3">
+              <div class="col-lg-8">
+                <!-- <span class="badge px-3 py-1 rounded-2 bg-light text-primary border fw-semibold small mb-2 text-uppercase">
+                  <i class="bi bi-shield-fill-check me-1" style="color:#14B8A6"></i> Réseau Certifié
+                </span> -->
+                <h2 class="h2 fw-bold text-dark mb-1" style="font-family:'Poppins',sans-serif;">
+                  Les agences qui nous font confiance
+                </h2>
+                <p class="text-muted small mb-0">
+                  Des agences agréées collaborent avec SanarHousings pour proposer des biens audités et sécurisés.
+                </p>
+              </div>
+              <div class="col-lg-4 text-lg-end">
+                <span class="badge rounded-pill bg-light text-dark border px-3 py-2 small">
+                  <i class="bi bi-buildings me-1 text-primary"></i>
+                  {{ agences.length }} agence{{ agences.length > 1 ? 's' : '' }} partenaire{{ agences.length > 1 ? 's' : '' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- DÉFILEMENT AUTOMATIQUE (MARQUEE) -->
+          <div class="details-marquee-outer">
+            <div class="details-marquee-track">
+              <!-- Première passe -->
+              @for (a of agences; track a.id) {
+                <div class="details-agency-card p-3 d-flex align-items-center gap-3">
+                  <div class="dac-avatar d-flex align-items-center justify-content-center rounded-circle flex-shrink-0">
+                    @if (a.logo_url) {
+                      <img [src]="a.logo_url" [alt]="a.nom" class="rounded-circle object-fit-cover" style="width:40px;height:40px;">
+                    } @else {
+                      <i class="bi {{ a.icone || 'bi-buildings' }} fs-4" style="color:#14B8A6;"></i>
+                    }
+                  </div>
+                  <div class="text-start">
+                    <div class="fw-bold text-dark small">{{ a.nom }}</div>
+                    <div class="text-muted" style="font-size:.78rem;">
+                      <i class="bi bi-geo-alt me-1" style="color:#14B8A6;"></i>{{ a.ville }}
+                    </div>
+                    @if (a.est_partenaire_certifie) {
+                      <span class="badge dac-certif-badge rounded-pill mt-1" style="font-size:.68rem;">
+                        <i class="bi bi-patch-check-fill me-1"></i>Agréée
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+              <!-- Deuxième passe (clone pour boucle infinie) -->
+              @for (a of agences; track 'd_' + a.id) {
+                <div class="details-agency-card p-3 d-flex align-items-center gap-3">
+                  <div class="dac-avatar d-flex align-items-center justify-content-center rounded-circle flex-shrink-0">
+                    @if (a.logo_url) {
+                      <img [src]="a.logo_url" [alt]="a.nom" class="rounded-circle object-fit-cover" style="width:40px;height:40px;">
+                    } @else {
+                      <i class="bi {{ a.icone || 'bi-buildings' }} fs-4" style="color:#14B8A6;"></i>
+                    }
+                  </div>
+                  <div class="text-start">
+                    <div class="fw-bold text-dark small">{{ a.nom }}</div>
+                    <div class="text-muted" style="font-size:.78rem;">
+                      <i class="bi bi-geo-alt me-1" style="color:#14B8A6;"></i>{{ a.ville }}
+                    </div>
+                    @if (a.est_partenaire_certifie) {
+                      <span class="badge dac-certif-badge rounded-pill mt-1" style="font-size:.68rem;">
+                        <i class="bi bi-patch-check-fill me-1"></i>Agréée
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- =================================================================== -->
+      <!-- SECTION 11 — QUESTIONS FRÉQUENTES (ACCORDÉON INTERACTIF)           -->
       <!-- =================================================================== -->
       <section class="py-5 bg-white border-bottom">
         <div class="container py-lg-4">
           <div class="text-center max-w-700 mx-auto mb-5">
             <!-- <span class="badge px-3 py-1 rounded-pill bg-light text-primary border fw-semibold small mb-2 text-uppercase">
-              FAQ LogementPlus
+              FAQ SanarHousings
             </span> -->
             <h2 class="h2 fw-bold text-dark mb-2" style="font-family: 'Poppins', sans-serif;">
               Questions fréquentes
@@ -811,13 +970,13 @@ interface FaqItem {
             <div class="cta-glow-bg"></div>
             <div class="position-relative" style="z-index: 2; max-width: 720px; margin: 0 auto;">
               <span class="badge bg-white bg-opacity-20 text-muted border border-white border-opacity-25 px-3 py-1 rounded-pill mb-3 small">
-                <i class="bi bi-house-door-fill me-1 text-warning"></i> Rejoignez LogementPlus
+                <i class="bi bi-house-door-fill me-1 text-warning"></i> Rejoignez SanarHousings
               </span>
               <h2 class="display-6 fw-bold mb-3 text-white" style="font-family: 'Poppins', sans-serif;">
                 Prêt à trouver votre prochain logement ?
               </h2>
               <p class="text-white-50 lead fs-6 mb-4">
-                Explorez les logements disponibles et découvrez une expérience de réservation simplifiée avec LogementPlus.
+                Explorez les logements disponibles et découvrez une expérience de réservation simplifiée avec SanarHousings.
               </p>
               <div class="d-flex flex-wrap justify-content-center gap-3">
                 <a routerLink="/logements" class="btn btn-accent btn-lg px-4 py-2-5 rounded-3 fw-semibold shadow d-inline-flex align-items-center gap-2">
@@ -1012,26 +1171,38 @@ interface FaqItem {
     }
 
     .btn-accent {
-      background-color: #14B8A6;
-      border-color: #14B8A6;
-      color: #FFFFFF;
-      transition: all 0.25s ease;
-      &:hover {
-        background-color: #0D9488;
-        border-color: #0D9488;
-        color: #FFFFFF;
-        transform: translateY(-2px);
-      }
+      background-color: #14B8A6; border-color: #14B8A6; color: #FFFFFF; transition: all 0.25s ease;
+      &:hover { background-color: #0D9488; border-color: #0D9488; color: #FFFFFF; transform: translateY(-2px); }
     }
+
+    /* ---- Stats & Marquee → styles.scss global (dsg-*, details-stats-section, details-marquee-*, dac-*) ---- */
   `]
 })
-export class AboutDetailsComponent {
+export class AboutDetailsComponent implements OnInit, OnDestroy {
   activeFaqIndex: number | null = 0;
+
+  private statsService = inject(StatsService);
+  private agenceService = inject(AgenceService);
+  private subs = new Subscription();
+
+  public stats: PlateformePublicStats | null = null;
+  public agences: Agence[] = [];
+
+  ngOnInit(): void {
+    this.stats = this.statsService.getStatsSync();
+    this.agences = this.agenceService.getAgencesSync();
+    this.subs.add(this.statsService.stats$.subscribe(s => { if (s) this.stats = s; }));
+    this.subs.add(this.agenceService.agences$.subscribe(list => { if (list && Array.isArray(list)) this.agences = list; }));
+    this.statsService.refresh();
+    this.agenceService.refresh();
+  }
+
+  ngOnDestroy(): void { this.subs.unsubscribe(); }
 
   faqs: FaqItem[] = [
     {
-      question: "Qu'est-ce que LogementPlus ?",
-      answer: "LogementPlus est une plateforme numérique conçue pour simplifier la mise en relation entre locataires, propriétaires et gestionnaires de biens immobiliers. Elle centralise les logements disponibles, permet l'envoi de demandes de réservation et met à disposition des gestionnaires des outils de suivi adaptés."
+      question: "Qu'est-ce que SanarHousings ?",
+      answer: "SanarHousings est une plateforme numérique conçue pour simplifier la mise en relation entre locataires, propriétaires et gestionnaires de biens immobiliers. Elle centralise les logements disponibles, permet l'envoi de demandes de réservation et met à disposition des gestionnaires des outils de suivi adaptés."
     },
     {
       question: "Comment rechercher un logement ?",
@@ -1054,8 +1225,8 @@ export class AboutDetailsComponent {
       answer: "Vous pouvez contacter les gestionnaires agréés via la rubrique « Contact » du site, où sont répertoriés leurs numéros directs (téléphone, WhatsApp ou SMS), ou directement au sein de votre espace locataire une fois une réservation initialisée."
     },
     {
-      question: "Comment utiliser LogementPlus sur mobile ?",
-      answer: "LogementPlus est entièrement responsive. Vous pouvez y accéder depuis n'importe quel navigateur mobile sur smartphone ou tablette sans installation requise. L'interface s'adapte automatiquement pour offrir une navigation fluide et des menus tactiles ergonomiques."
+      question: "Comment utiliser SanarHousings sur mobile ?",
+      answer: "SanarHousings est entièrement responsive. Vous pouvez y accéder depuis n'importe quel navigateur mobile sur smartphone ou tablette sans installation requise. L'interface s'adapte automatiquement pour offrir une navigation fluide et des menus tactiles ergonomiques."
     }
   ];
 

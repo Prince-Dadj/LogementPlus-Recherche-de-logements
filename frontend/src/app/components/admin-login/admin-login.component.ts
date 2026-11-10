@@ -158,7 +158,7 @@ export class AdminLoginComponent implements OnInit {
       this.email = 'laminecamara@gmail.com';
       this.password = 'password123';
     } else {
-      this.email = 'superadmin@logementplus.com';
+      this.email = 'superadmin@sanarhousings.sn';
       this.password = 'password123';
     }
   }

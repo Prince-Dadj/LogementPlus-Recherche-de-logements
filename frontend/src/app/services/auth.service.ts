@@ -46,13 +46,13 @@ const DEMO_ACCOUNTS: { email: string; password: string; user: User; token: strin
     } as User
   },
   {
-    email: 'superadmin@logementplus.sn',
+    email: 'superadmin@sanarhousings.sn',
     password: 'superadmin123',
     token: 'demo_token_superadmin_001',
     user: {
       id: 99,
-      name: 'Super Admin LogementPlus',
-      email: 'superadmin@logementplus.sn',
+      name: 'Super Admin SanarHousings',
+      email: 'superadmin@sanarhousings.sn',
       role: 'superadmin',
       statut: 'actif',
       telephone: '+221 33 800 00 00'

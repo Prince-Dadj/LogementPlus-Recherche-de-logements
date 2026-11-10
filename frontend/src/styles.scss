@@ -70,6 +70,7 @@ $box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
 html {
     scroll-behavior: smooth;
+  
 }
 
 #qui-sommes-nous {
@@ -1446,4 +1447,102 @@ input:focus:not(:focus-visible) {
     will-change: auto !important;
   }
 }
+
+// 8. STYLES GLOBAUX — PAGE ABOUT & ABOUT-DETAILS
+
+// Hero about
+.about-hero-backdrop {
+  position: absolute; inset: 0;
+  background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85') center/cover no-repeat;
+  z-index: 1;
+}
+.about-hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(7,37,89,.55), rgba(11,61,145,.42) 50%, rgba(15,23,42,.6)),
+              radial-gradient(circle at 15% 25%, rgba(20,184,166,.2), transparent 50%);
+  z-index: 2;
+}
+.about-cta-banner {
+  background: linear-gradient(135deg, #072559, #0B3D91 60%, #0F4C81);
+  border: 1px solid rgba(255,255,255,.15);
+}
+.about-cta-bg {
+  position: absolute; inset: 0;
+  background: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80') center/cover;
+  opacity: .12; pointer-events: none;
+}
+
+// Section statistiques (about + about-details)
+.about-stats-section,
+.details-stats-section {
+  background: linear-gradient(135deg, #072559, #0B3D91 55%, #0d2557);
+  border-top: 4px solid #14B8A6;
+  border-bottom: 4px solid #14B8A6;
+}
+.dsg-left, .dsg-right {
+  position: absolute; border-radius: 50%; pointer-events: none; filter: blur(50px);
+}
+.dsg-left  { top:-40px; left:-40px; width:200px; height:200px; background:rgba(20,184,166,.15); }
+.dsg-right { bottom:-40px; right:-40px; width:200px; height:200px; background:rgba(56,189,248,.12); }
+.dsg-badge { background:rgba(20,184,166,.2); color:#5EEAD4; border:1px solid rgba(20,184,166,.35); }
+.dsg-metric-card {
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); backdrop-filter:blur(8px);
+  transition:transform .3s, background .3s;
+  &:hover { transform:translateY(-4px); background:rgba(255,255,255,.1); border-color:rgba(20,184,166,.5); }
+}
+.dsg-icon-wrap { width:56px; height:56px; }
+.dsg-icon-amber { background:rgba(245,158,11,.18); color:#F59E0B; }
+.dsg-icon-teal  { background:rgba(20,184,166,.18); color:#2DD4BF; }
+.dsg-icon-blue  { background:rgba(56,189,248,.18); color:#38BDF8; }
+.dsg-icon-green { background:rgba(52,211,153,.18); color:#34D399; }
+.dsg-number { font-size:2.2rem; font-family:'Poppins',sans-serif; line-height:1.1; }
+
+// Agences — cartes dans about
+.agency-showcase-card {
+  transition: transform .3s, box-shadow .3s, border-color .3s;
+  border-color: rgba(11,61,145,.08) !important; overflow:hidden;
+  &:hover {
+    transform:translateY(-5px);
+    box-shadow:0 16px 32px rgba(11,61,145,.1) !important;
+    border-color:#14B8A6 !important;
+  }
+}
+.badge-certifie { background:#14B8A6; color:#FFF; font-weight:600; }
+.agency-avatar-wrap { width:64px; height:64px; background:rgba(20,184,166,.1); border:2px solid rgba(20,184,166,.3); }
+.agency-desc {
+  font-size:.82rem; line-height:1.5;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.btn-agency-call {
+  width:32px; height:32px; background:rgba(11,61,145,.08); color:#0B3D91; transition:all .2s;
+  &:hover { background:#0B3D91; color:#FFF; }
+}
+
+// Marquee agences — about-details
+.details-marquee-outer {
+  overflow:hidden; position:relative;
+  &::before, &::after {
+    content:''; position:absolute; top:0; bottom:0; width:80px; z-index:2; pointer-events:none;
+  }
+  &::before { left:0; background:linear-gradient(to right,#fff,transparent); }
+  &::after  { right:0; background:linear-gradient(to left,#fff,transparent); }
+}
+.details-marquee-track {
+  display:flex; gap:16px; width:max-content;
+  animation:detailsMarquee 30s linear infinite;
+  &:hover { animation-play-state:paused; }
+}
+@keyframes detailsMarquee {
+  0%   { transform:translateX(0); }
+  100% { transform:translateX(-50%); }
+}
+.details-agency-card {
+  min-width:220px; max-width:260px; background:#F8FAFC;
+  border:1px solid rgba(11,61,145,.1); border-radius:12px;
+  transition:transform .2s, box-shadow .2s, border-color .2s;
+  &:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(11,61,145,.1); border-color:#14B8A6; }
+}
+.dac-avatar { width:50px; height:50px; background:rgba(20,184,166,.1); border:2px solid rgba(20,184,166,.3); }
+.dac-certif-badge { background:#14B8A6; color:#FFF; font-weight:600; }
+
 

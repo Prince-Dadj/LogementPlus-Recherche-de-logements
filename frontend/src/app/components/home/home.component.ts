@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -434,7 +434,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
                 <strong class="small text-dark">Plafonnement officiel de la caution</strong>
               </div>
               <small class="text-muted" style="font-size: 11px;">
-                LogementPlus interdit strictement les demandes abusives de 3 mois de caution et protège vos finances.
+                SanarHousings interdit strictement les demandes abusives de 3 mois de caution et protège vos finances.
               </small>
             </div>
           </div>
@@ -569,7 +569,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
     <section class="py-5 mt-5" id="statsPlateformeSection" style="background: linear-gradient(135deg, #0B3D91 0%, #0d2557 100%); border-top: 4px solid #14B8A6; border-bottom: 4px solid #14B8A6;">
       <div class="container">
         <div class="text-start mb-4">
-          <h2 class="h3 fw-bold text-white mb-1"> <span style="font-size: 30px;" class="text-secondary me-2">LogementPlus</span> en chiffres</h2>
+          <h2 class="h3 fw-bold text-white mb-1"> <span style="font-size: 30px;" class="text-secondary me-2">SanarHousings</span> en chiffres</h2>
           <p class="text-white-50 small mb-0">Des données réelles, calculées dynamiquement depuis notre base de données</p>
         </div>
         <div class="row g-4">
@@ -645,7 +645,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
               <i class="bi bi-building-check me-1"></i> Réseau Certifié Sénégal
             </span> 
             <h2 class="h3 fw-bold text-white mb-1">Les agences immobilières qui nous font confiance</h2>
-            <p class="text-white-50 small mb-0">Des professionnels agréés collaborent avec LogementPlus pour vous proposer des biens audités et conformes aux baux sénégalais.</p>
+            <p class="text-white-50 small mb-0">Des professionnels agréés collaborent avec SanarHousings pour vous proposer des biens audités et conformes aux baux sénégalais.</p>
           </div>
           <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
             <a href="mailto:ndiayethierno194@gmail.com"
@@ -726,7 +726,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
             <p class="text-white-50 small mx-auto mb-4" style="max-width: 540px; line-height: 1.6;">
               Aucune agence immobilière n'est répertoriée publiquement pour le moment. Vous dirigez un cabinet de gestion ou une agence immobilière à Dakar, Saly ou sur la Petite Côte ? Rejoignez les agences pionnières de la plateforme.
             </p>
-            <a href="mailto:partenaireslogementplus@gmail.com?subject=Candidature%20Agence%20Partenaire%20LogementPlus"
+            <a href="mailto:partenaires@sanarhousings.sn?subject=Candidature%20Agence%20Partenaire%20SanarHousings"
                class="btn btn-partner-cta px-4 py-2 fw-bold rounded-pill shadow-lg">
               <i class="bi bi-briefcase-fill me-2"></i>Devenir notre première agence partenaire
             </a>
@@ -758,65 +758,128 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
         </div>
 
         @if (temoignages && temoignages.length > 0) {
-          <!-- Slider Témoignages — 2 cartes par slide sur desktop, 1 sur mobile -->
-          <div class="testimonials-slider-wrap position-relative overflow-hidden" style="min-height: 220px;">
-            <div class="testimonials-track d-flex" [style.transform]="'translateX(-' + (activeTestimonial * 100) + '%)'">
-              @for (pair of testimonialPairs; track $index) {
-                <div class="testimonial-slide flex-shrink-0 w-100 px-2">
-                  <div class="row g-3">
-                    @for (t of pair; track t.id) {
-                      <div class="col-12 col-md-6 mb-3">
-                        <div class="ugb-testimonial-card">
-                          <!-- Badge de citation supérieur droit (inspiré du design UGB aux couleurs LogementPlus) -->
-                          <div class="ugb-quote-badge">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-                            </svg>
-                          </div>
-
-                          <!-- En-tête : Photo avec cadre d'accentuation offset + Étoiles + Nom & Titre -->
-                          <div class="ugb-testimonial-header">
-                            <div class="ugb-avatar-wrapper">
-                              <img [src]="t.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'"
-                                   [alt]="t.nom_auteur">
+          <!-- 1. SLIDER DESKTOP (>= 768px) : 2 CARTES PAR SLIDE -->
+          <div class="d-none d-md-block">
+            <div class="testimonials-slider-wrap position-relative overflow-hidden" style="min-height: 220px;">
+              <div class="testimonials-track d-flex" [style.transform]="'translateX(-' + (activeTestimonial * 100) + '%)'">
+                @for (pair of testimonialPairs; track $index) {
+                  <div class="testimonial-slide flex-shrink-0 w-100 px-2">
+                    <div class="row g-3">
+                      @for (t of pair; track t.id) {
+                        <div class="col-md-6 mb-3">
+                          <div class="ugb-testimonial-card h-100">
+                            <!-- Badge de citation supérieur droit -->
+                            <div class="ugb-quote-badge">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+                              </svg>
                             </div>
-                            <div class="ugb-author-info">
-                              <div class="ugb-stars">
-                                @for (s of [1,2,3,4,5]; track s) {
-                                  <i class="bi" [class.bi-star-fill]="s <= t.note" [class.bi-star]="s > t.note"></i>
-                                }
+
+                            <!-- En-tête : Photo avec cadre d'accentuation offset + Étoiles + Nom & Titre -->
+                            <div class="ugb-testimonial-header">
+                              <div class="ugb-avatar-wrapper">
+                                <img [src]="t.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'"
+                                     [alt]="t.nom_auteur">
                               </div>
-                              <h3 class="ugb-author-name">{{ t.nom_auteur }}</h3>
-                              <p class="ugb-author-role">
-                                {{ getRoleLabel(t.role_auteur) }} • {{ t.ville || 'Sénégal' }}
-                              </p>
+                              <div class="ugb-author-info">
+                                <div class="ugb-stars">
+                                  @for (s of [1,2,3,4,5]; track s) {
+                                    <i class="bi" [class.bi-star-fill]="s <= t.note" [class.bi-star]="s > t.note"></i>
+                                  }
+                                </div>
+                                <h3 class="ugb-author-name">{{ t.nom_auteur }}</h3>
+                                <p class="ugb-author-role">
+                                  {{ getRoleLabel(t.role_auteur) }} • {{ t.ville || 'Sénégal' }}
+                                </p>
+                              </div>
                             </div>
-                          </div>
 
-                          <!-- Corps : Texte du témoignage entre guillemets -->
-                          <div class="ugb-testimonial-body">
-                            <p>“{{ t.commentaire }}”</p>
+                            <!-- Corps : Texte du témoignage entre guillemets -->
+                            <div class="ugb-testimonial-body">
+                              <p>“{{ t.commentaire }}”</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    }
+                      }
+                    </div>
                   </div>
+                }
+              </div>
+
+              <!-- Dots navigation desktop par paire -->
+              @if (testimonialPairs.length > 1) {
+                <div class="d-flex justify-content-center gap-2 mt-3">
+                  @for (pair of testimonialPairs; track $index) {
+                    <button
+                      type="button"
+                      class="testimonial-dot"
+                      [class.active]="activeTestimonial === $index"
+                      (click)="setTestimonial($index)"
+                      [attr.aria-label]="'Diapositive ' + ($index + 1)">
+                    </button>
+                  }
                 </div>
               }
             </div>
+          </div>
 
-            <!-- Dots navigation par paire -->
-            @if (testimonialPairs.length > 1) {
-              <div class="d-flex justify-content-center gap-2 mt-3">
-                @for (pair of testimonialPairs; track $index) {
-                  <button
-                    class="testimonial-dot"
-                    [class.active]="activeTestimonial === $index"
-                    (click)="setTestimonial($index)">
-                  </button>
+          <!-- 2. SLIDER MOBILE (< 768px) : EXACTEMENT 1 TÉMOIGNAGE PAR SLIDE -->
+          <div class="d-md-none">
+            <div class="testimonials-slider-wrap position-relative overflow-hidden" style="min-height: 200px;">
+              <div class="testimonials-track d-flex" [style.transform]="'translateX(-' + (activeTestimonialMobile * 100) + '%)'">
+                @for (t of temoignages; track t.id) {
+                  <div class="testimonial-slide flex-shrink-0 w-100 px-1">
+                    <div class="ugb-testimonial-card shadow-sm mb-2">
+                      <!-- Badge de citation supérieur droit -->
+                      <div class="ugb-quote-badge">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+                        </svg>
+                      </div>
+
+                      <!-- En-tête : Photo avec cadre + Étoiles + Nom & Titre -->
+                      <div class="ugb-testimonial-header">
+                        <div class="ugb-avatar-wrapper">
+                          <img [src]="t.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'"
+                               [alt]="t.nom_auteur">
+                        </div>
+                        <div class="ugb-author-info">
+                          <div class="ugb-stars">
+                            @for (s of [1,2,3,4,5]; track s) {
+                              <i class="bi" [class.bi-star-fill]="s <= t.note" [class.bi-star]="s > t.note"></i>
+                            }
+                          </div>
+                          <h3 class="ugb-author-name fs-6">{{ t.nom_auteur }}</h3>
+                          <p class="ugb-author-role mb-0" style="font-size: 11px;">
+                            {{ getRoleLabel(t.role_auteur) }} • {{ t.ville || 'Sénégal' }}
+                          </p>
+                        </div>
+                      </div>
+
+                      <!-- Corps : Texte du témoignage -->
+                      <div class="ugb-testimonial-body mt-2">
+                        <p class="mb-0" style="font-size: 13.5px; line-height: 1.6;">“{{ t.commentaire }}”</p>
+                      </div>
+                    </div>
+                  </div>
                 }
               </div>
-            }
+
+              <!-- Dots navigation mobile (1 point par témoignage) -->
+              @if (temoignages.length > 1) {
+                <div class="d-flex justify-content-center gap-2 mt-2">
+                  @for (t of temoignages; track $index) {
+                    <button
+                      type="button"
+                      class="testimonial-dot"
+                      [class.active]="activeTestimonialMobile === $index"
+                      (click)="setTestimonialMobile($index)"
+                      [attr.aria-label]="'Témoignage ' + ($index + 1)">
+                    </button>
+                  }
+                </div>
+              }
+            </div>
           </div>
         } @else {
           <!-- EMPTY STATE MODERNE & STYLISÉ POUR LES AVIS -->
@@ -847,7 +910,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
           <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
             <div class="modal-header border-bottom p-3 bg-light">
               <h5 class="modal-title h6 fw-bold mb-0 d-flex align-items-center gap-2 text-dark">
-                <i class="bi bi-star-fill text-warning"></i> Partager votre avis sur LogementPlus
+                <i class="bi bi-star-fill text-warning"></i> Partager votre avis sur SanarHousings
               </h5>
               <button type="button" class="btn-close" (click)="toggleAvisModal()"></button>
             </div>
@@ -954,7 +1017,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
                     <textarea
                       class="form-control form-control-sm rounded-3"
                       rows="3"
-                      placeholder="Décrivez votre expérience avec LogementPlus : rapidité de réservation, clarté des baux, sérieux des interlocuteurs..."
+                      placeholder="Décrivez votre expérience avec SanarHousings : rapidité de réservation, clarté des baux, sérieux des interlocuteurs..."
                       [(ngModel)]="newAvisCommentaire"
                       name="commentaire"
                       required>
@@ -1077,7 +1140,7 @@ import { Logement, Agence, Temoignage, PlateformePublicStats, Neighborhood } fro
                 <i class="bi bi-house-heart-fill" style="font-size:28px;color:#FFD700;"></i>
               </div>
               <div>
-                <div style="color:rgba(255,255,255,0.8);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">LogementPlus Sénégal</div>
+                <div style="color:rgba(255,255,255,0.8);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">SanarHousings Sénégal</div>
                 <h2 style="color:#fff;font-size:18px;font-weight:700;margin:4px 0 0;">Bienvenue sur la plateforme !</h2>
               </div>
             </div>
@@ -1237,7 +1300,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   faqs = [
     {
       question: 'Combien de mois de caution un bailleur peut-il légalement exiger au Sénégal ?',
-      answer: 'En vertu de la réglementation sénégalaise sur les baux à usage d\'habitation, la caution est légalement plafonnée à deux (2) mois de loyer au maximum. LogementPlus applique et garantit ce plafond sur toutes les annonces de la plateforme.',
+      answer: 'En vertu de la réglementation sénégalaise sur les baux à usage d\'habitation, la caution est légalement plafonnée à deux (2) mois de loyer au maximum. SanarHousings applique et garantit ce plafond sur toutes les annonces de la plateforme.',
       open: true
     },
     {
@@ -1261,8 +1324,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   alertContact = '';
   alertSent = false;
 
-  // 5. Témoignages dynamiques & slider automatique
+  // 5. Témoignages dynamiques & slider automatique (desktop = par 2, mobile = par 1)
   activeTestimonial = 0;
+  activeTestimonialMobile = 0;
   private testimonialInterval: any;
   temoignages: Temoignage[] = [];
   private temoignagesSub?: Subscription;
@@ -1429,10 +1493,15 @@ export class HomeComponent implements OnInit, OnDestroy {
       clearInterval(this.testimonialInterval);
     }
     this.testimonialInterval = setInterval(() => {
+      // Défilement par 2 sur Desktop
       if (this.testimonialPairs && this.testimonialPairs.length > 0) {
         this.activeTestimonial = (this.activeTestimonial + 1) % this.testimonialPairs.length;
-        this.cdr.markForCheck();
       }
+      // Défilement par 1 sur Mobile
+      if (this.temoignages && this.temoignages.length > 0) {
+        this.activeTestimonialMobile = (this.activeTestimonialMobile + 1) % this.temoignages.length;
+      }
+      this.cdr.markForCheck();
     }, 5000);
   }
 
@@ -1445,12 +1514,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  setTestimonialMobile(index: number): void {
+    this.activeTestimonialMobile = index;
+    if (this.testimonialInterval) {
+      clearInterval(this.testimonialInterval);
+      this.startTestimonialSlider();
+    }
+    this.cdr.markForCheck();
+  }
+
   getRoleLabel(role: string): string {
     switch (role) {
       case 'locataire': return 'Locataire certifié';
       case 'gestionnaire': return 'Propriétaire bailleur';
       case 'agence': return 'Agence partenaire';
-      default: return 'Membre LogementPlus';
+      default: return 'Membre SanarHousings';
     }
   }
 
@@ -1601,7 +1679,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   getCardWhatsApp(logement: Logement): string {
     const text = encodeURIComponent(
-      `Bonjour, je vous contacte depuis LogementPlus Sénégal pour le logement Réf #${logement.id} : "${logement.titre}" à ${logement.quartier || logement.ville} (${logement.prix_par_mois.toLocaleString('fr-FR')} FCFA/mois). Est-il toujours disponible ?`
+      `Bonjour, je vous contacte depuis SanarHousings Sénégal pour le logement Réf #${logement.id} : "${logement.titre}" à ${logement.quartier || logement.ville} (${logement.prix_par_mois.toLocaleString('fr-FR')} FCFA/mois). Est-il toujours disponible ?`
     );
     return `https://wa.me/221770809110?text=${text}`;
   }
