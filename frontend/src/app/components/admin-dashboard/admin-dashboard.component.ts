@@ -231,9 +231,30 @@ Chart.register(...registerables);
                               <i class="bi bi-chat-dots-fill text-primary"></i>
                             </button> -->
                             @if (r.statut === 'en_attente') {
-                              <div class="btn-group btn-group-sm">
+                              <div class="d-lg-flex d-none btn-group btn-group-sm">
                                 <!-- Voir dossier locataire -->
-                                <button class="btn btn-outline-primary" (click)="ouvrirDossier(r)"><i class="bi bi-folder2-open me-1"></i></button>
+                                <button class="btn btn-outline-primary" (click)="ouvrirDossier(r)"><i class="bi bi-folder2-open me-1"></i>
+                                Dossier
+                                </button>
+                                <!-- Valider -->
+                                <button class="btn btn-success" [disabled]="traitementEnCoursId === r.id" (click)="valider(r.id)" title="Valider la réservation">
+                                  @if (traitementEnCoursId === r.id) {
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                  } @else {
+                                    <i class="bi bi-check-lg me-1"></i> Valider
+                                  }
+                                  
+                                </button>
+                                <!-- Refuser -->
+                                <button class="btn btn-outline-danger" [disabled]="traitementEnCoursId === r.id" (click)="ouvrirRefusModal(r)" title="Refuser la réservation">
+                                  <i class="bi bi-x-lg me-1"></i> Refuser
+                                </button>
+                              </div>
+
+                              <div class="d-flex d-lg-none btn-group btn-group-sm">
+                                <!-- Voir dossier locataire -->
+                                <button class="btn btn-outline-primary" (click)="ouvrirDossier(r)"><i class="bi bi-folder2-open me-1"></i>
+                                </button>
                                 <!-- Valider -->
                                 <button class="btn btn-success" [disabled]="traitementEnCoursId === r.id" (click)="valider(r.id)" title="Valider la réservation">
                                   @if (traitementEnCoursId === r.id) {
@@ -249,7 +270,7 @@ Chart.register(...registerables);
                                 </button>
                               </div>
                             } @else {
-                              <div class="btn-group btn-group-sm">
+                              <div class="d-lg-flex d-none btn-group btn-group-sm">
                                 <button class="btn btn-outline-secondary btn-sm px-2" (click)="viewContrat(r)" title="Consulter le Contrat de Bail">
                                   <i class="bi bi-file-earmark-pdf"></i> Bail
                                 </button>
@@ -257,6 +278,15 @@ Chart.register(...registerables);
                                   <i class="bi bi-receipt"></i> Reçu
                                 </button>
                               </div>
+                              <div class="d-lg-none d-flex btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary btn-sm px-3" (click)="viewContrat(r)" title="Consulter le Contrat de Bail">
+                                  <i class="bi bi-file-earmark-pdf"></i>
+                                </button>
+                                <button class="btn btn btn-sm px-3" style="background: rgba(0,0,0,0.1);" (click)="viewRecu(r)" title="Consulter le Reçu Officiel">
+                                  <i class="bi bi-receipt"></i>
+                                </button>
+                              </div>
+
                             }
                           </div>
                         </td>
